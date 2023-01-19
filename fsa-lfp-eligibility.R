@@ -3,17 +3,17 @@ library(magrittr)
 
 conus <- 
   tigris::counties(cb = TRUE, refresh = TRUE) %>%
-  dplyr::filter(!(STUSPS %in% c("PR", "AK", "VI", "HI", "MP", "AS", "GU")))
-
-conus %<>%
+  dplyr::filter(!(STUSPS %in% c("PR", "AK", "VI", "HI", "MP", "AS", "GU"))) %>%
   rmapshaper::ms_simplify() %>%
   sf::st_transform("EPSG:5070")
 
 lfp_eligibility <-
-  list.files("foia/2023-FSA-00937-F Bocinsky/",
-           full.names = TRUE) %>%
-  purrr::map_dfr(readxl::read_excel,
-                 col_types = "text") %>%
+  unzip("foia/2023-FSA-00937-F Bocinsky.zip", list = TRUE) %$%
+  Name %>%
+  purrr::map_dfr(
+    ~readxl::read_excel(unzip("foia/2023-FSA-00937-F Bocinsky.zip", .x, 
+                              exdir = tempdir()), 
+                        col_types = "text")) %>%
   dplyr::select(-`...25`,
                 -`...26`) %>%
   dplyr::mutate(dplyr::across(c(D2_START_DATE:D4B_END), 
@@ -83,7 +83,7 @@ lfp_eligibility %>%
   dplyr::arrange(PROGRAM_YEAR, FSA_CODE, PASTURE_TYPE) %>%
   readr::write_csv("fsa-lfp-eligibility.csv")
 
-dir.create("figures",
+dir.create("maps",
            showWarnings = FALSE)
 
 lfp_eligibility_graphs <- 
@@ -122,7 +122,7 @@ lfp_eligibility_graphs <-
             legend.text = element_text(size = 12),
             strip.text.x = element_text(margin = margin(b = 5)))
     ) %T>%
-      ggsave(filename = paste0("figures/", PROGRAM_YEAR, "-", stringr::str_to_title(PASTURE_TYPE),".png"),
+      ggsave(filename = paste0("maps/", PROGRAM_YEAR, "-", stringr::str_to_title(PASTURE_TYPE),".png"),
              device = png,
              width = 10,
              height = 6.86,
@@ -130,83 +130,3 @@ lfp_eligibility_graphs <-
              dpi = 600)
     )
   )
-
-lfp_eligibility %>%
-  dplyr::select(PROGRAM_YEAR, 
-                FSA_STATE,
-                FSA_CODE,
-                PASTURE_TYPE, 
-                GROWING_SEASON_START, 
-                GROWING_SEASON_END) %>%
-  dplyr::filter(!(lubridate::day(GROWING_SEASON_START) %in% c(1,15))) %>%
-  dplyr::mutate(GROWING_SEASON_START = format(GROWING_SEASON_START, "%m-%d"),
-                GROWING_SEASON_END = format(GROWING_SEASON_END, "%m-%d")) %>%
-  dplyr::arrange(
-    PROGRAM_YEAR,
-    FSA_STATE,
-    FSA_CODE,
-                 PASTURE_TYPE
-    ) %>%
-
-  dplyr::group_by(FSA_STATE, PASTURE_TYPE, GROWING_SEASON_START, GROWING_SEASON_END) %>%
-  dplyr::summarise(PROGRAM_YEAR = paste(sort(unique(PROGRAM_YEAR)), collapse = ", ")) %>%
-  readr::write_csv("lfp_crop_start_dates_weird.csv")
-  dplyr::distinct() %>%
-  dplyr::arrange(
-    PROGRAM_YEAR,
-    FSA_STATE,
-    PASTURE_TYPE
-  )
-
-  dplyr::distinct()
-  dplyr::group_by(PROGRAM_YEAR, FSA_CODE, FACTOR) %>%
-  dplyr::summarise(PASTURE_TYPE = paste(PASTURE_TYPE, collapse = ", "))
-
-
-
-
-
-lfp_eligibility %>%
-  dplyr::select(PROGRAM_YEAR, PASTURE_TYPE, FSA_CODE, FACTOR) %>%
-  dplyr::group_by(PROGRAM_YEAR, FSA_CODE, FACTOR) %>%
-  dplyr::summarise(PASTURE_TYPE = paste(PASTURE_TYPE, collapse = ", "))
-  dplyr::filter(PROGRAM_YEAR == 2012,
-                PASTURE_TYPE == "LONG SEASON SMALL GRAINS") %>%
-  
-  
-  
-  dplyr::left_join(conus, .,
-                   by = c("GEOID" = "FSA_CODE")) %>%
-  ggplot2::ggplot() +
-  geom_sf(aes(fill = FACTOR),
-          col = "white") +
-  geom_sf(data = conus %>%
-            dplyr::group_by(STATEFP) %>%
-            dplyr::summarise(),
-          col = "white",
-          fill = NA,
-          linewidth = 0.5) +
-  scale_fill_manual(values = c("1" = "#FFFF54",
-                               "2" = "#F3AE3D",
-                               "3" =  "#6D4E16",
-                               "4" = "#EA3323",
-                               "5" =  "#7316A2"),
-                                        drop = FALSE,
-                    name = paste0("Eligible County Payment Months\n2012, LONG SEASON SMALL GRAINS"),
-                    guide = guide_legend(direction = "horizontal",
-                                         title.position = "top"),
-                    na.value = "grey80") +
-  theme_void(base_size = 24) +
-  theme(legend.position = c(0.225,0.125),
-        # legend.key.width = unit(0.1, "npc"),
-        legend.title = element_text(size = 16),
-        legend.text = element_text(size = 14),
-        strip.text.x = element_text(margin = margin(b = 5)))
-
-ggsave(filename = "figures/2012-LONG SEASON SMALL GRAINS.png",
-       device = png,
-       width = 10,
-       height = 6.86,
-       bg = "white",
-       dpi = 600)
-
