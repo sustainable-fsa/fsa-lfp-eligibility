@@ -139,13 +139,7 @@ lfp_eligibility_graphs <-
                 legend.title = element_text(size = 14),
                 legend.text = element_text(size = 12),
                 strip.text.x = element_text(margin = margin(b = 5)))
-      ) %T>%
-        ggsave(filename = paste0("maps/", PROGRAM_YEAR, "-", PASTURE_TYPE,".png"),
-               device = png,
-               width = 11,
-               height = 8.5,
-               bg = "white",
-               dpi = 600)
+      )
     )
   )
 
