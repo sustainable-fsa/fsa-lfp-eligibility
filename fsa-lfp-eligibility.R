@@ -7,6 +7,12 @@ conus <-
   rmapshaper::ms_simplify() %>%
   sf::st_transform("EPSG:5070")
 
+# lfp_eligibility %>%
+#   dplyr::select(PASTURE_CODE, PASTURE_TYPE) %>%
+#   dplyr::distinct() %>%
+#   dplyr::arrange(PASTURE_CODE) %>%
+#   as.data.frame()
+
 lfp_eligibility <-
   unzip("foia/2023-FSA-00937-F Bocinsky.zip", list = TRUE) %$%
   Name %>%
