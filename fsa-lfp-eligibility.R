@@ -84,22 +84,20 @@ lfp_eligibility <-
              PASTURE_TYPE),
     PASTURE_TYPE = 
       ifelse(PASTURE_TYPE == "FULL SEASON IMPROVE MIXED",
-             "FULL SEASON IMPROVED — MIXED",
+             "FULL SEASON IMPROVED (MIXED)",
              PASTURE_TYPE),
     PASTURE_TYPE = 
       ifelse(PASTURE_TYPE == "SHORT SSN SPRING SML GRN",
-             "SHORT SEASON SMALL GRAINS — SPRING",
+             "SHORT SEASON SMALL GRAINS (SPRING)",
              PASTURE_TYPE),
     PASTURE_TYPE = 
       ifelse(PASTURE_TYPE == "SHRT SSN FALL_WTR SML GRN",
-             "SHORT SEASON SMALL GRAINS — FALL–WINTER",
+             "SHORT SEASON SMALL GRAINS (FALL–WINTER)",
              PASTURE_TYPE),
     PASTURE_TYPE = stringr::str_to_title(PASTURE_TYPE),
     FSA_COUNTY_NAME = stringr::str_to_title(FSA_COUNTY_NAME)
-  )
-
-lfp_eligibility %>%
-  dplyr::arrange(PROGRAM_YEAR, FSA_CODE, PASTURE_TYPE) %>%
+  ) %>%
+  dplyr::arrange(PROGRAM_YEAR, FSA_CODE, PASTURE_TYPE) %T>%
   readr::write_csv("fsa-lfp-eligibility.csv")
 
 dir.create("maps",
@@ -109,6 +107,7 @@ lfp_eligibility_graphs <-
   lfp_eligibility %>%
   dplyr::group_by(PROGRAM_YEAR, PASTURE_TYPE) %>%
   tidyr::nest() %>%
+  dplyr::arrange(PROGRAM_YEAR, PASTURE_TYPE) %>%
   dplyr::rowwise() %>%
   dplyr::mutate(
     graph = list(
@@ -130,7 +129,7 @@ lfp_eligibility_graphs <-
                                        "4" = "#EA3323",
                                        "5" =  "#7316A2"),
                             drop = FALSE,
-                            name = paste0("Eligible County Payment Months\n", PROGRAM_YEAR, ", ", stringr::str_to_title(PASTURE_TYPE)),
+                            name = paste0("Eligible County Payment Months\n", PROGRAM_YEAR, ", ", PASTURE_TYPE),
                             guide = guide_legend(direction = "horizontal",
                                                  title.position = "top"),
                             na.value = "grey80") +
@@ -141,11 +140,23 @@ lfp_eligibility_graphs <-
                 legend.text = element_text(size = 12),
                 strip.text.x = element_text(margin = margin(b = 5)))
       ) %T>%
-        ggsave(filename = paste0("maps/", PROGRAM_YEAR, "-", stringr::str_to_title(PASTURE_TYPE),".png"),
+        ggsave(filename = paste0("maps/", PROGRAM_YEAR, "-", PASTURE_TYPE,".png"),
                device = png,
-               width = 10,
-               height = 6.86,
+               width = 11,
+               height = 8.5,
                bg = "white",
                dpi = 600)
     )
   )
+
+unlink("fsa-lfp-eligibility.pdf")
+
+cairo_pdf(filename = "fsa-lfp-eligibility.pdf",
+          width = 10,
+          height = 6.86,
+          bg = "white",
+          onefile = TRUE)
+
+lfp_eligibility_graphs$graph
+
+dev.off()
