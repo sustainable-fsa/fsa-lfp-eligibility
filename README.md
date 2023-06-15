@@ -8,11 +8,11 @@ Data in the [`foia/2023-FSA-00937-F Bocinsky.zip`](/foia/2023-FSA-00937-F%20Boci
 
 This work was supported by a grant from the National Oceanic and Atmospheric Administration, [National Integrated Drought Information System](https://www.drought.gov) (University Corporation for Atmospheric Research subaward SUBAWD000858). We also acknowledge and appreciate the prompt and professional FOIA response we received from the USDA Farm Production and Conservation Business Center.
 
-Please contact Kyle Bocinsky ([kyle.bocinsky@umt.edu](mailto:kyle.bocinsky@umt.edu)) with any questions.
+Please contact Kyle Bocinsky ([kyle.bocinsky@umontana.edu](mailto:kyle.bocinsky@umontana.edu)) with any questions.
 
 <br>
 <p align="center">
 <a href="https://climate.umt.edu" target="_blank">
-<img src="https://climate.umt.edu/imx/MCO_logo.svg" width="350" alt="The Montana Climate Office logo.">
+<img src="https://www.umt.edu/climate/imx/mco_logo.svg" width="350" alt="The Montana Climate Office logo.">
 </a>
 </p>
