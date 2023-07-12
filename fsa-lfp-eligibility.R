@@ -1,11 +1,29 @@
 library(tidyverse)
 library(magrittr)
 
-conus <- 
-  tigris::counties(cb = TRUE, refresh = TRUE) %>%
-  dplyr::filter(!(STUSPS %in% c("PR", "AK", "VI", "HI", "MP", "AS", "GU"))) %>%
-  rmapshaper::ms_simplify() %>%
-  sf::st_transform("EPSG:5070")
+fsa_counties <-
+  sf::read_sf("/vsizip/fsa-counties/FSA_Counties_dd17.gdb.zip") %>%
+  dplyr::filter(!(STPO %in% c("AK", "GU", "HI", "VI", "AS", "MP", "PR"))) %>%
+  dplyr::transmute(FSA_CODE = FSA_STCOU,
+                   FSA_STATE = paste(FSA_ST, STPO, sep = "-"),
+                   FSA_COUNTY_NAME = FSA_Name) %>%
+  {
+    tmp <- tempfile(fileext = ".geojson")
+    sf::write_sf(., tmp,
+                 delete_dsn = TRUE)
+    sf::read_sf(tmp)
+  } %>%
+  dplyr::group_by(FSA_CODE, FSA_STATE, FSA_COUNTY_NAME) %>%
+  dplyr::summarise(.groups = "drop") %>%
+  sf::st_transform("EPSG:5070") %>%
+  sf::st_make_valid() %>%
+  sf::st_intersection(  
+    tigris::counties(cb = TRUE) %>%
+      sf::st_union() %>%
+      sf::st_transform("EPSG:5070")
+  ) %>%
+  rmapshaper::ms_simplify(keep = 0.015, keep_shapes = TRUE) %>%
+  sf::st_make_valid()
 
 lfp_eligibility <-
   unzip("foia/2023-FSA-00937-F Bocinsky.zip", list = TRUE) %$%
@@ -17,10 +35,9 @@ lfp_eligibility <-
   dplyr::select(-`...25`,
                 -`...26`) %>%
   dplyr::mutate(dplyr::across(c(D2_START_DATE:D4B_END), 
-                              lubridate::as_date),
+                              \(x) lubridate::as_date(x)),
                 dplyr::across(c(START,END),
-                              lubridate::as_date,
-                              format = "mdy",
+                              \(x) lubridate::as_date(x, format = "mdy"),
                               .names = "GROWING_SEASON_{.col}"),
                 PROGRAM_YEAR = ifelse(is.na(PROGRAM_YEAR), `PROGRAM YEAR`, PROGRAM_YEAR),
                 PROGRAM_YEAR = as.integer(PROGRAM_YEAR),
@@ -67,15 +84,6 @@ lfp_eligibility <-
                 FSA_COUNTY_NAME,
                 PASTURE_TYPE, 
                 dplyr::everything()) %>%
-  dplyr::mutate(FSA_CODE = ifelse(FSA_CODE == "12025", "12086", FSA_CODE), # "DADE" presumed to be Miami-Dade
-                FSA_CODE = ifelse(FSA_CODE == "19156", "19155", FSA_CODE), # FSA split Pottawattamie, IA into E and W in some years. Re-joining.
-                FSA_CODE = ifelse(FSA_CODE == "27120", "27119", FSA_CODE), # FSA split Polk, MN into E and W in some years. Re-joining.
-                FSA_CODE = ifelse(FSA_CODE == "32035", "32023", FSA_CODE), # FSA split Nye, NV into E and W in some years. Re-joining.
-                FSA_CODE = ifelse(FSA_CODE == "29193", "29186", FSA_CODE), # FSA mis-labeled Ste. Genevieve, MO in some years. Re-labeling.
-                FSA_CODE = ifelse(FSA_CODE == "46113", "46102", FSA_CODE), # FSA mis-labeled Oglala Lakota, SD (Formerly Shannon, SD) in some years. Re-labeling.
-                FSA_CODE = ifelse(FSA_CODE == "27112", "27111", FSA_CODE), # FSA mis-labeled Otter Tail, MN in some years. Re-labeling.
-  ) %>%
-  dplyr::filter(FSA_CODE != "27138") %>% # This seems to have been an error. No other crops have the same start date
   dplyr::mutate(
     FSA_CODE = stringr::str_pad(FSA_CODE, 5, pad = "0"),
     PASTURE_TYPE = 
@@ -112,13 +120,12 @@ lfp_eligibility_graphs <-
   dplyr::mutate(
     graph = list(
       (
-        dplyr::left_join(conus, data,
-                         by = c("GEOID" = "FSA_CODE")) %>%
+        dplyr::left_join(dplyr::select(fsa_counties, FSA_CODE), data) %>%
           ggplot2::ggplot() +
           geom_sf(aes(fill = FACTOR),
                   col = "white") +
-          geom_sf(data = conus %>%
-                    dplyr::group_by(STATEFP) %>%
+          geom_sf(data = fsa_counties %>%
+                    dplyr::group_by(FSA_STATE) %>%
                     dplyr::summarise(),
                   col = "white",
                   fill = NA,
