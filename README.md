@@ -13,6 +13,6 @@ Please contact Kyle Bocinsky ([kyle.bocinsky@umontana.edu](mailto:kyle.bocinsky@
 <br>
 <p align="center">
 <a href="https://climate.umt.edu" target="_blank">
-<img src="https://www.umt.edu/climate/imx/mco_logo.svg" width="350" alt="The Montana Climate Office logo.">
+<img src="https://climate.umt.edu/assets/images/MCO_logo_icon_only.png" width="350" alt="The Montana Climate Office logo.">
 </a>
 </p>
