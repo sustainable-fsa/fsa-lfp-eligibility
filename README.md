@@ -1,5 +1,5 @@
 [![GitHub Release](https://img.shields.io/github/v/release/climate-smart-usda/fsa-lfp-eligibility?label=GitHub%20Release&color=%239c27b0)](https://github.com/climate-smart-usda/fsa-lfp-eligibility)
-[![DOI](https://zenodo.org/badge/814751699.svg)](https://zenodo.org/badge/latestdoi/814751699)
+[![DOI](https://zenodo.org/badge/587852382.svg)](https://zenodo.org/badge/latestdoi/587852382)
 
 # FSA Annual County Eligibility Data from the Livestock Forage Disaster Program, 2008–2024
 
