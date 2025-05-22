@@ -106,7 +106,7 @@ FSA county codes are documented in [FSA Handbook 1-CM, Exhibit 101](https://www.
 
 If using this data in published work, please cite:
 
-> USDA Farm Service Agency. *Livestock Forage Disaster Program Eligibility, 2008–2024*. FOIA request 2025-FSA-04690-F by R. Kyle Bocinsky. Accessed via GitHub archive, YYYY. https://github.com/climate-smart-usda/fsa-lfp-eligibility
+> USDA Farm Service Agency. *Livestock Forage Disaster Program Eligibility, 2008–2024*. FOIA request 2025-FSA-04690-F by R. Kyle Bocinsky. Accessed via GitHub archive, YYYY. https://climate-smart-usda.github.io/fsa-lfp-eligibility/
 
 ---
 
