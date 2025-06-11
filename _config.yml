@@ -1,7 +1,7 @@
 title: FSA annual county-level normal grazing period data archive
 description: An an archive of the annual county-level normal grazing period data from the USDA Farm Service Agency
 author: R. Kyle Bocinsky
-url: "https://climate-smart-usda.github.io/fsa-lfp-eligibility/"  # Your GitHub Pages URL
+url: "https://sustainable-fsa.github.io/fsa-lfp-eligibility/"  # Your GitHub Pages URL
 baseurl: "/fsa-lfp-eligibility"
 
 remote_theme: jekyll/minima

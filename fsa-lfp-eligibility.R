@@ -8,7 +8,7 @@ fsa_lfp_eligibility <-
         files = "LFP_Pasture_Grazing_Report.xlsx",
         exdir = tempdir()) %>%
   readxl::read_excel() %>%
-  # Some start and end dates are NA — remove
+  # Remove counties deemed "Not Eligible"
   dplyr::filter(payment_type != "Not Eligible") %>%
   dplyr::rename_with(.fn = \(x){
     stringr::str_replace_all(x, "_", " ") %>%
