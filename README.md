@@ -1,6 +1,6 @@
 
 [![GitHub
-Release](https://img.shields.io/github/v/release/climate-smart-usda/fsa-lfp-eligibility?label=GitHub%20Release&color=%239c27b0)](https://github.com/climate-smart-usda/fsa-lfp-eligibility)
+Release](https://img.shields.io/github/v/release/sustainable-fsa/fsa-lfp-eligibility?label=GitHub%20Release&color=%239c27b0)](https://github.com/sustainable-fsa/fsa-lfp-eligibility)
 [![DOI](https://zenodo.org/badge/587852382.svg)](https://zenodo.org/badge/latestdoi/587852382)
 
 # FSA Annual County Eligibility Data from the Livestock Forage Disaster Program, 2008–2024
@@ -111,7 +111,7 @@ The Quarto dashboard
 </iframe>
 
 Access a full-screen version of the dashboard at:  
-<https://climate-smart-usda.github.io/fsa-lfp-eligibility/fsa-lfp-eligibility.html>
+<https://sustainable-fsa.github.io/fsa-lfp-eligibility/fsa-lfp-eligibility.html>
 
 ------------------------------------------------------------------------
 
@@ -134,7 +134,7 @@ eligibility <-
 ## The LFP Eligibility data files use FSA county definitions
 ## Download from the FSA_Counties_dd17 archive
 counties <- 
-  sf::read_sf("https://climate-smart-usda.github.io/fsa-counties-dd17/fsa-counties-dd17.topojson",
+  sf::read_sf("https://sustainable-fsa.github.io/fsa-counties-dd17/fsa-counties-dd17.topojson",
               layer = "counties") |>
   sf::st_set_crs("EPSG:4326") |>
   sf::st_transform("EPSG:5070")
@@ -201,7 +201,7 @@ data with geographic boundaries, we use the FSA-specific geospatial
 dataset archived in the companion repository:
 
 🔗
-[**climate-smart-usda/fsa-counties-dd17**](https://climate-smart-usda.github.io/fsa-counties-dd17/)
+[**sustainable-fsa/fsa-counties-dd17**](https://sustainable-fsa.github.io/fsa-counties-dd17/)
 
 FSA county codes are documented in [FSA Handbook 1-CM, Exhibit
 101](https://www.fsa.usda.gov/Internet/FSA_File/1-cm_r03_a80.pdf).
@@ -215,7 +215,7 @@ If using this data in published work, please cite:
 > USDA Farm Service Agency. *Livestock Forage Disaster Program
 > Eligibility, 2008–2024*. FOIA request 2025-FSA-04690-F by R. Kyle
 > Bocinsky. Accessed via GitHub archive, YYYY.
-> <https://climate-smart-usda.github.io/fsa-lfp-eligibility/>
+> <https://sustainable-fsa.github.io/fsa-lfp-eligibility/>
 
 ------------------------------------------------------------------------
 
@@ -247,7 +247,7 @@ Locator**](https://offices.sc.egov.usda.gov/locator/app)
 
 This project is part of:
 
-**[*Enhancing Climate-smart Disaster Relief in FSA
+**[*Enhancing Sustainable Disaster Relief in FSA
 Programs*](https://www.ars.usda.gov/research/project/?accnNo=444612)**  
 Supported by USDA OCE/OEEP and USDA Climate Hubs  
 Prepared by the [Montana Climate Office](https://climate.umt.edu)

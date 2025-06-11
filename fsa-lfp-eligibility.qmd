@@ -99,7 +99,7 @@ formatDate = d3.utcFormat("%b %d, %Y")  // e.g., "Apr 18, 2025"
 // counties
 
 //counties_file = await d3.json("https://cdn.jsdelivr.net/npm/us-atlas@3/counties-10m.json");
-us = await d3.json("https://climate-smart-usda.github.io/fsa-counties-dd17/fsa-counties-dd17.topojson");
+us = await d3.json("https://sustainable-fsa.github.io/fsa-counties-dd17/fsa-counties-dd17.topojson");
 //us = await d3.json("assets/fsa-counties-dd17-albers.topojson");
 counties = topojson.feature(us, us.objects.counties)
 
