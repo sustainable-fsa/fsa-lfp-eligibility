@@ -29,30 +29,23 @@ dir.create("assets",
 
 readr::read_csv("fsa-lfp-eligibility.csv") %>%
   dplyr::transmute(
-    id = `FSA Code`,
-    # state = `State Name`,
-    # county = `County Name`,
+    id = paste0(State, County),
+    state = `State Name`,
+    county = `County Name`,
     year = `Program Year`,
     type = `Pasture Type`,
     disaster =`Disaster Type`,
-    disaster_start_date = `Disaster Start Date`,
-    qualifier = `Qualifying Drought Event`,
-    payment_type = `Payment Type`) %>%
-    # Split northern and southern Shoshone County, ID, which are separated in the FSA county dataset
-  dplyr::left_join(tibble::tibble(id = c("16079", "16079"),
-                                  new = c("16055", "16009")),
-                   relationship = "many-to-many") %>%
-  dplyr::arrange(dplyr::desc(qualifier)) %>%
-  dplyr::mutate(id = ifelse(!is.na(new), new, id)) %>%
+    disaster_start_date = `Date of Qualifying Drought`,
+    qualifier = `Note (FOIA 2025-FSA-04690-F Bocinsky)`,
+    payment_type = ifelse(is.na(`Payment Factor`), "Eligible", paste(`Payment Factor`, "Month"))) %>%
   dplyr::distinct(id, year, type, disaster, .keep_all = TRUE) %>%
-  dplyr::select(!new) %>%
   dplyr::arrange(id, type, dplyr::desc(year), disaster) %>%
   readr::write_csv(
     file.path(
       "assets",
       "fsa-lfp-eligibility-simple.csv"
     ), 
-    quote = "all") 
+    quote = "all")
 
 ```
 

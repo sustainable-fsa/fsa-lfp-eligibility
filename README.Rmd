@@ -13,11 +13,12 @@ editor_options:
 
 This repository is an archive of the annual county-level eligibility data for the [Livestock Forage Disaster Program (LFP)](https://www.fsa.usda.gov/resources/programs/livestock-forage-disaster-program-lfp). 
 
-The data in this repository were acquired via FOIA request **2025-FSA-04690-F** by R. Kyle Bocinsky (Montana Climate Office) and fulfilled on April 15, 2025. This replaces a previously filed and fulfilled FOIA response covering 2012–2022 (2023-FSA-00937-F). Both FOIA responses, including the original Excel workbooks, are archived in the [`foia`](./foia) directory.
+The data in this repository were acquired via FOIA request **2025-FSA-08422-F** by R. Kyle Bocinsky (Montana Climate Office) and fulfilled on August 7, 2025. This replaces previously filed and fulfilled FOIA response covering 2012–2022 (2023-FSA-00937-F) and 2008–2024 (2025-FSA-04690-F). All FOIA responses, including the original Excel workbooks, are archived in the [`foia`](./foia) directory.
 
 ## 🗂️ Contents
 
-- [`foia/2025-FSA-04690-F Bocinsky.zip`](./foia/2025-FSA-04690-F Bocinsky.zip) — FOIA data and correspondence
+- [`foia/2025-FSA-08422-F Bocinsky.zip`](./foia/2025-FSA-08422-F Bocinsky.zip) — FOIA data and correspondence
+- [`foia/2025-FSA-04690-F Bocinsky.zip`](./foia/2025-FSA-04690-F Bocinsky.zip) — previous FOIA data and correspondence (archived)
 - [`foia/2023-FSA-00937-F Bocinsky.zip`](./foia/2023-FSA-00937-F Bocinsky.zip) — previous FOIA data and correspondence (archived)
 - [`fsa-lfp-eligibility.csv`](./fsa-lfp-eligibility.csv) — cleaned and consolidated data
 - [`fsa-lfp-eligibility.R`](./fsa-lfp-eligibility.R) — processing script
@@ -26,40 +27,11 @@ The data in this repository were acquired via FOIA request **2025-FSA-04690-F** 
 
 ---
 
-## 📥 Input Data: FOIA Excel Workbook
+## 📥 Input Data: FOIA Excel Workbooks
 
-The FOIA response contains LFP eligibility data from **2008 through 2024** for each pasture type, county, and program year.
+The FOIA response contains LFP eligibility data from **2012 through July, 2025** for each pasture type, county, and program year. These have been supplemented with previously-received FOIA data (FOIA 2025-FSA-04690-F Bocinsky) that included eligibility determinations since 2008, but not many of the other variables requested. Each program year was delivered in individual Microsoft Excel files.
 
-### Key Variables
-
-program_year	state_fsa_code	county_fsa_code	state_name	county_name	disaster_type	payment_type	note_text	disaster_start_date	pasture_type
-
-| Variable Name                       | Description                                           |
-|-------------------------------------|-------------------------------------------------------|
-| program_year                        | Year the data applies to                              |
-| state_fsa_code                      | FSA-assigned state code (not always ANSI/FIPS)        |
-| county_fsa_code                     | FSA-assigned county code (not always ANSI/FIPS)       |
-| state_name                          | U.S. state                                            |
-| county_name                         | County or county-equivalent name                      |
-| disaster_type                       | Type of disaster (e.g., Drought, Fire)                |
-| payment_type                        | Number of Monthly Payments                            |
-| note_text                           | Qualifying drought status                             |
-| disaster_start_date                 | Start date of qualifying disaster                     |
-| pasture_type                        | Pasture classification (e.g., Native, Improved)       |
-
----
-
-## 🧹 Processing Workflow
-
-The processing script [`fsa-lfp-eligibility.R`](./fsa-lfp-eligibility.R):
-
-1. **Unzips and reads** the Excel workbook.
-2. **Filters records** with missing dates.
-3. **Constructs an `FSA Code`** by concatenating state and county FSA codes.
-4. **Cleans and standardizes** pasture type names.
-5. **Removes invalid or duplicate entries**.
-6. **Exports** the cleaned data to [`fsa-lfp-eligibility.csv`](./fsa-lfp-eligibility.csv).
-7. **Renders** an interactive Quarto dashboard.
+Column names and data can vary subtly by year. The processing workflow in [`fsa-lfp-eligibility.R`](./fsa-lfp-eligibility.R) harmonizes the files, and appends the 2008 through 2011 data from the earlier FOIA.
 
 ---
 
@@ -69,19 +41,23 @@ The file [`fsa-lfp-eligibility.csv`](./fsa-lfp-eligibility.csv) is a tidy datase
 
 ### Variables in Output
 
-| Variable Name                        | Description                                          |
-|-------------------------------------|-------------------------------------------------------|
-| `Program Year`                      | Year the data applies to                              |
-| `State Name`                        | U.S. state                                            |
-| `County Name`                       | County or county-equivalent name                      |
-| `State FSA Code`                    | FSA state code (not always ANSI/FIPS)        |
-| `County FSA Code`                   | FSA county code (not always ANSI/FIPS)       |
-| `FSA Code`                          | Combined `State FSA Code` + `County FSA Code`         |
-| `Pasture Grazing Type`              | Pasture classification (e.g., Native, Improved)       |
-| `Disaster Type`                     | Type of disaster (e.g., Drought, Fire)                |
-| `Disaster Start Date`               | Start date of qualifying disaster                     |
-| `Qualifying Drought Event`          | US Drought Monitor drought class                      |
-| `Payment Type`                      | Number of Monthly Payments                            |
+| Variable Name                          | Description                                           |
+|----------------------------------------|-------------------------------------------------------|
+| `State`                                | A two-digit FIPS state code                           |
+| `County`                               | A three-digit FIPS county code                        |
+| `State Name`                           | U.S. state                                            |
+| `County Name`                          | County or county-equivalent name                      |
+| `Program Year`                         | Year the data applies to                              |
+| `Pasture Type`                         | Pasture classification (e.g., Native, Improved)       |
+| `Disaster Type`                        | Type of disaster (e.g., Drought, Fire)                |
+| `D2 START DATE`:`D4B END`              | Start and end dates for qualifying drought events     |
+| `Date of Qualifying Drought`           | Start date of qualifying disaster                     |
+| `Drought Factor`                       | Qualifying payments given the drought severity        |
+| `Grazing Period Start Date`            | Start date of grazing period for the pasture type     |
+| `Grazing Period End Date`              | End date of grazing period for the pasture type       |
+| `Maximum Eligible Payment Months`      | Duration of grazing period, in months                 |
+| `Payment Factor`                       | Number of eligible payments                           |
+| `Note (FOIA 2025-FSA-04690-F Bocinsky)`| for 2008 through 2011, the qualifying drought type    |
 
 ---
 
@@ -115,13 +91,21 @@ library(rmapshaper) # For innerlines function
 eligibility <- 
   readr::read_csv("fsa-lfp-eligibility.csv")
 
-## The LFP Eligibility data files use FSA county definitions
-## Download from the FSA_Counties_dd17 archive
 counties <- 
-  sf::read_sf("https://sustainable-fsa.github.io/fsa-counties-dd17/fsa-counties-dd17.topojson",
-              layer = "counties") |>
-  sf::st_set_crs("EPSG:4326") |>
-  sf::st_transform("EPSG:5070")
+  tigris::counties(cb = TRUE, 
+                   resolution = "5m",
+                   progress_bar = FALSE) |>
+  dplyr::filter(
+    !(STATE_NAME %in% c("Guam", 
+                        "American Samoa", 
+                        "United States Virgin Islands", 
+                        "Commonwealth of the Northern Mariana Islands"))
+  ) |>
+  sf::st_cast("POLYGON", warn = FALSE, do_split = TRUE) |>
+  tigris::shift_geometry() |>
+  dplyr::group_by(STATEFP, COUNTYFP) |>
+  dplyr::summarise(.groups = "drop") |>
+  sf::st_cast("MULTIPOLYGON")
 
 ## Calculate the 2024 LFP Eligibility for Native Pasture, and
 ## combine with the county data
@@ -130,12 +114,16 @@ eligibility_counties <-
   dplyr::filter(`Pasture Type` == "Native Pasture",
                 `Program Year` == 2024) |>
   dplyr::transmute(
-    id = paste0(`State FSA Code`,`County FSA Code`),
-    `Payment Type` = factor(`Payment Type`,
-                            levels = paste0(1:5, " Month"),
+    id = paste0(State, County),
+    `Payment Factor` = factor(`Payment Factor`,
+                            levels = 1:5,
+                            labels = paste0(1:5, " Month"),
                             ordered = TRUE)
   ) |>
-  dplyr::left_join(counties) |>
+  dplyr::left_join(
+    counties |>
+      dplyr::transmute(id = paste0(STATEFP, COUNTYFP))
+    ) |>
   sf::st_as_sf()
 
 # Plot the map
@@ -144,7 +132,7 @@ ggplot(counties) +
           fill = "grey80",
           color = NA) +
   geom_sf(data = eligibility_counties,
-          aes(fill = `Payment Type`), 
+          aes(fill = `Payment Factor`), 
           color = NA,
           show.legend = TRUE) +
   geom_sf(data = rmapshaper::ms_innerlines(counties),
@@ -152,13 +140,13 @@ ggplot(counties) +
           color = "white",
           linewidth = 0.1) +
   geom_sf(data = counties |>
-            dplyr::group_by(state) |>
+            dplyr::group_by(STATEFP) |>
             dplyr::summarise() |>
             rmapshaper::ms_innerlines(),
           fill = NA,
           color = "white",
           linewidth = 0.2) +
-  # Use the same color scale used by the LFP (yuck)
+  # Use the same color scale used by the LFP
   # https://www.fsa.usda.gov/documents/native-pasture-2024-lfp-01-23-25
   scale_fill_manual(
     values = c("1 Month" = "#E0E436", 
@@ -175,21 +163,11 @@ ggplot(counties) +
 
 ---
 
-## 🧭 About FSA County Codes
-
-The USDA FSA uses custom county definitions that differ from standard ANSI/FIPS codes used by the U.S. Census. To align the LFP Eligibility data with geographic boundaries, we use the FSA-specific geospatial dataset archived in the companion repository:
-
-🔗 [**sustainable-fsa/fsa-counties-dd17**](https://sustainable-fsa.github.io/fsa-counties-dd17/)
-
-FSA county codes are documented in [FSA Handbook 1-CM, Exhibit 101](https://www.fsa.usda.gov/Internet/FSA_File/1-cm_r03_a80.pdf).
-
----
-
 ## 📜 Citation
 
 If using this data in published work, please cite:
 
-> USDA Farm Service Agency. *Livestock Forage Disaster Program Eligibility, 2008–2024*. FOIA request 2025-FSA-04690-F by R. Kyle Bocinsky. Accessed via GitHub archive, YYYY. https://sustainable-fsa.github.io/fsa-lfp-eligibility/
+> USDA Farm Service Agency. *Livestock Forage Disaster Program Eligibility, 2008–2024*. FOIA request 2025-FSA-08422-F by R. Kyle Bocinsky. Accessed via GitHub archive, YYYY. https://sustainable-fsa.github.io/fsa-lfp-eligibility/
 
 ---
 

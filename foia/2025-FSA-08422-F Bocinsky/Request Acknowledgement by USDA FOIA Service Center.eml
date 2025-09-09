@@ -1,0 +1,139 @@
+Received: from BY1PR01MB9090.prod.exchangelabs.com (2603:10b6:a03:5b1::6) by
+ BN5PR01MB9382.prod.exchangelabs.com with HTTPS; Tue, 15 Jul 2025 16:16:43
+ +0000
+Received: from SJ0PR03CA0210.namprd03.prod.outlook.com (2603:10b6:a03:2ef::35)
+ by BY1PR01MB9090.prod.exchangelabs.com (2603:10b6:a03:5b1::6) with Microsoft
+ SMTP Server (version=TLS1_2, cipher=TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384) id
+ 15.20.8857.38; Tue, 15 Jul 2025 16:16:42 +0000
+Received: from SJ5PEPF000001D2.namprd05.prod.outlook.com
+ (2603:10b6:a03:2ef:cafe::fc) by SJ0PR03CA0210.outlook.office365.com
+ (2603:10b6:a03:2ef::35) with Microsoft SMTP Server (version=TLS1_3,
+ cipher=TLS_AES_256_GCM_SHA384) id 15.20.8943.19 via Frontend Transport; Tue,
+ 15 Jul 2025 16:16:42 +0000
+Authentication-Results: spf=pass (sender IP is 199.137.48.53)
+ smtp.mailfrom=usda.gov; dkim=pass (signature was verified)
+ header.d=usda.gov;dmarc=pass action=none header.from=usda.gov;compauth=pass
+ reason=100
+Received-SPF: Pass (protection.outlook.com: domain of usda.gov designates
+ 199.137.48.53 as permitted sender) receiver=protection.outlook.com;
+ client-ip=199.137.48.53; helo=ftc.mailproxy1.usda.gov; pr=C
+Received: from ftc.mailproxy1.usda.gov (199.137.48.53) by
+ SJ5PEPF000001D2.mail.protection.outlook.com (10.167.242.54) with Microsoft
+ SMTP Server (version=TLS1_2, cipher=TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384) id
+ 15.20.8922.22 via Frontend Transport; Tue, 15 Jul 2025 16:16:41 +0000
+Received: from pps.filterd (aiomokcclms001.usda.net [127.0.0.1])
+	by aiomokcclms001.usda.net (8.18.1.2/8.18.1.2) with ESMTP id 56FF9MnD013886
+	for <kyle.bocinsky@umt.edu>; Tue, 15 Jul 2025 11:16:40 -0500
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=usda.gov;
+ h=content-transfer-encoding : content-type : date : from : message-id :
+ mime-version : subject : to; s=usda.20240923;
+ bh=kqolWUL+X4adeH4txA0loMdRwpN4aMw2TjU/hZr68pY=;
+ b=YB/Z5HgskA8WhTV0uBMa213WyLdtevhjxlTxHMjSXlmOcGHCr8RQiBFiWgr47YEFsD3Y
+ 5NNDfQPVwIQJ/TbjPN6kSKKf4OlHm7EzZmSgdnHuh0uoUjlk8cJbNrE8CeuySI+q5Z9d
+ FOI68+/nTY9W9JpjL1pn1BbQA3jtVQJRxZIAujqUaPI7ywKKVETWr2uuUbTiG2l/2+zR
+ X1zUctOD57mrx3H1Xjv2jZ5LbuQCf8+OXCzpTzPZr/G5moWRirJlHJ1giNit+CGsIyll
+ kQLA+qpmQ3UKJHTwr4Yu/aZe5QsrtciOlzF15SF0q1WomoH5YS05Ahp1bsUVcgisMFSC nA== 
+Received: from usda-pal-prod ([65.196.93.7])
+	by aiomokcclms001.usda.net (PPS) with ESMTPS id 47wsccjvky-1
+	(version=TLSv1.2 cipher=ECDHE-RSA-AES256-GCM-SHA384 bits=256 verify=NOT)
+	for <kyle.bocinsky@umt.edu>; Tue, 15 Jul 2025 11:16:40 -0500
+From: fxhelp@usda.gov
+To: kyle.bocinsky@umt.edu
+Date: 15 Jul 2025 12:16:39 -0400
+Subject: Request Acknowledgement by USDA FOIA Service Center
+Content-Type: text/html; charset=us-ascii
+Content-Transfer-Encoding: quoted-printable
+Message-ID: <47wsccjvky-1@aiomokcclms001.usda.net>
+X-Proofpoint-ORIG-GUID: RXSTJdfHoEGiTCXTG3y_zypKLVO5QqqV
+X-Proofpoint-Spam-Details-Enc: AW1haW4tMjUwNzE1MDE0OSBTYWx0ZWRfX51hsgDXaAHhu tS31cWVEfzim0O+gVm34zYJaGMBJPboQfQucQeXa9nGzP481iSem+juJfQ8bzRYaibg+E2/pTJG onughJZta0cpMqQGzafO87gaW8UB9TbCzppYYiV0K/lRvJTIRYtz35Agk/KCg1P5X27eXYpXwsE
+ EU7PwcVrSeNt5yolA1QUIE54d28Wbl7nec9dEw0i9+g5YEffsUOEShWC7fMb8lkpEw5VtqiVmcg IPZg554+7T6aubXpvWqCxQgDDu7a+c4xgwfPLRxwaL37wS8TO8LA==
+X-Proofpoint-GUID: RXSTJdfHoEGiTCXTG3y_zypKLVO5QqqV
+X-Proofpoint-Virus-Version: vendor=baseguard
+ engine=ICAP:2.0.293,Aquarius:18.0.1099,Hydra:6.1.9,FMLib:17.12.80.40
+ definitions=2025-07-15_04,2025-07-15_02,2025-03-28_01
+X-Proofpoint-Spam-Details: rule=notspam policy=default score=0 mlxscore=0 phishscore=0 suspectscore=0
+ bulkscore=0 mlxlogscore=657 malwarescore=0 spamscore=0 adultscore=0
+ classifier=spam adjust=0 reason=mlx scancount=1 engine=8.12.0-2505160000
+ definitions=main-2507150149
+Return-Path: fxhelp@usda.gov
+X-MS-Exchange-Organization-ExpirationStartTime: 15 Jul 2025 16:16:41.9104
+ (UTC)
+X-MS-Exchange-Organization-ExpirationStartTimeReason: OriginalSubmit
+X-MS-Exchange-Organization-ExpirationInterval: 1:00:00:00.0000000
+X-MS-Exchange-Organization-ExpirationIntervalReason: OriginalSubmit
+X-MS-Exchange-Organization-Network-Message-Id: 3127bf6c-ee24-4090-6594-08ddc3bafc34
+X-EOPAttributedMessage: 0
+X-EOPTenantAttributedMessage: 68407ce5-03da-49ff-af0a-724be0d37c9d:0
+X-MS-Exchange-Organization-MessageDirectionality: Incoming
+X-MS-PublicTrafficType: Email
+X-MS-TrafficTypeDiagnostic: SJ5PEPF000001D2:EE_|BY1PR01MB9090:EE_|BN5PR01MB9382:EE_
+X-MS-Exchange-Organization-AuthSource: SJ5PEPF000001D2.namprd05.prod.outlook.com
+X-MS-Exchange-Organization-AuthAs: Anonymous
+X-MS-Office365-Filtering-Correlation-Id: 3127bf6c-ee24-4090-6594-08ddc3bafc34
+X-MS-Exchange-AtpMessageProperties: SA|SL
+X-MS-Exchange-Organization-SCL: 1
+X-Microsoft-Antispam: BCL:0;ARA:13230040|8096899003;
+X-Forefront-Antispam-Report: CIP:199.137.48.53;CTRY:US;LANG:en;SCL:1;SRV:;IPV:NLI;SFV:NSPM;H:ftc.mailproxy1.usda.gov;PTR:ftc.mailproxy1.usda.gov;CAT:NONE;SFS:(13230040)(8096899003);DIR:INB;
+X-MS-Exchange-CrossTenant-OriginalArrivalTime: 15 Jul 2025 16:16:41.5898
+ (UTC)
+X-MS-Exchange-CrossTenant-Network-Message-Id: 3127bf6c-ee24-4090-6594-08ddc3bafc34
+X-MS-Exchange-CrossTenant-Id: 68407ce5-03da-49ff-af0a-724be0d37c9d
+X-MS-Exchange-CrossTenant-AuthSource: SJ5PEPF000001D2.namprd05.prod.outlook.com
+X-MS-Exchange-CrossTenant-AuthAs: Anonymous
+X-MS-Exchange-CrossTenant-FromEntityHeader: Internet
+X-MS-Exchange-Transport-CrossTenantHeadersStamped: BY1PR01MB9090
+X-MS-Exchange-Transport-EndToEndLatency: 00:00:02.1697145
+X-MS-Exchange-Processed-By-BccFoldering: 15.20.8901.028
+X-Microsoft-Antispam-Mailbox-Delivery:
+	ucf:0;jmr:0;auth:0;dest:I;ENG:(910005)(944506478)(944626604)(920097)(930097)(140003)(1420198);
+X-Microsoft-Antispam-Message-Info:
+	=?us-ascii?Q?CwgEnbVKNrQbMCS4C/nZPvxsGi2Atf3e3xfedQY2ROHEYr+okk1EedUHFWzL?=
+ =?us-ascii?Q?qFwMb/zr94ZhgjMKEew9rlyklK7S7HYZsnwj/V6rFDIKocgt7anHvxEXkDHC?=
+ =?us-ascii?Q?WEJor6lq/ufDKt9fbnZRpAPz+trfL6nvTtKtAnEKqqoOXhBmCrV89U4zRjD4?=
+ =?us-ascii?Q?rTuGYGFT0z7HDZ+qFWswrP7JAZ4VQU0as3MQKIrs+xkZVgLhR6HSw+aF4t6r?=
+ =?us-ascii?Q?PWpG+RaynBdaXuDVWiuScdIyUaW6AvDN+00MS6LRnPvS0d1Fm62Tg7CSjLeH?=
+ =?us-ascii?Q?Tmm3E7aT2BOPPWdjtijRHV8cqn98tfgossM3W057QI1Fhu3QfzKorfUC4kOX?=
+ =?us-ascii?Q?WvAVIOPJVv5VoKj3zX1PYZijdm7sfsMCy+LCgcINe7g5DqoAmVA0ubsK0jpL?=
+ =?us-ascii?Q?60Kn2nQBlulv/qbjHUvtWGn9BTXo3tvOD0Rs4vHLC/KI3MwVCgapr5aTZawW?=
+ =?us-ascii?Q?s4vqel0PvMTbHeLpxC0YW8L/jnrdkVqRpedKTIGdQgefE1Sh/tHagUKwickr?=
+ =?us-ascii?Q?TDsVtSrdmbPxHJgGyyHmbmuORuEsrUxZBNwzIM4YH7NGtNG7qdqsRivkcTp7?=
+ =?us-ascii?Q?fL8lmNbfkJKWvVrFfOt/tILUrnZuh34no/07KUTAaYunVWDtADqnShCQ4M8L?=
+ =?us-ascii?Q?cQKXvqB6TCmEQ0h43X3d7Ph03+M55iC8As5VRq7NS5L4BOEX/F+x72+S1TEd?=
+ =?us-ascii?Q?lcg1ziNE2tlhswLYJNqOiiirzZ77PSNQqPA6te6EPm45EMAw7LPtSO7hEH/6?=
+ =?us-ascii?Q?LnCmvL53K0L7Norfg9YMG4fp/hLqq8ni0GjaKDMAAlA6BiMFT1QXdv8R8vkU?=
+ =?us-ascii?Q?pXW7bp0RlBXlBKBtHzkXjXwy+ShFl4ygCvdVklJxnFdEoJxLLVAykBiaIuGR?=
+ =?us-ascii?Q?28wv7U5Ifw1TfCKOqiWzttYTJVeUDkLCi5tHIrnb78kWtaqiOtBj0SIHgi8c?=
+ =?us-ascii?Q?7gBa2yOgQnsT+Dlais2X2x2fwjaEHMyTLdGwYV79Legn6wpGEYRiH//lwBCm?=
+ =?us-ascii?Q?+1ZOF1uIxXwOUTgvmlfIwX0qpUZ1JL0fEplmYrt6wuct0kYCcpjRfiXNnDee?=
+ =?us-ascii?Q?BHi+jNTIGdPDU+r0I+GURf7CNkcgdPiP8YpKUJ/Jb5EM6j2lMfse8k+eLmJC?=
+ =?us-ascii?Q?nefHTK+gPlggPMmK2VJuPnHmAu4to4ntycy75jPpkXff5nmf/SFq86dD+QU/?=
+ =?us-ascii?Q?VgFiSBzkryvsE230jwuePw3aCADyvmJveZQhOhRQ4U/kRTf4V6miax3fjXBU?=
+ =?us-ascii?Q?IMm6v/xP8AeZ7NWEkDhl1uu0ubDaXmm9qH5dDVo6D82JL96PwWwVvOceVS/X?=
+ =?us-ascii?Q?idN3VuacRp1yx79K9lCPoIBGVhhcjbr2iMD2AhTo5ne2lGlJ/gTQiR16x6F4?=
+ =?us-ascii?Q?Y0mVeXkzIVdX/YRWIAZZzKYhySWZv7EYq8sPBE3bJmbB4Ud7cmfZ1LUHCnIu?=
+ =?us-ascii?Q?TpFoqPMOfaIztOEu228KuZw371lLCgeIbGk4BvizfWqSalfSQD+NOnmMBd8+?=
+ =?us-ascii?Q?2vjIdsH3QxJAZHHuyfRM+316R1BwZFDmgaTbNLq/X3iZGEiFTDgqJdXK1JKd?=
+ =?us-ascii?Q?uQLKmnU/VOsCWVGiD1cUw5VX4L9Dll8s/bZXYmDht+N9mMp14kqRn6cyO4a7?=
+ =?us-ascii?Q?PEaAjmGrwkIw6ZZ5s4YYWCB9tmX4Nd1Ez9EpiOP4XslmHBOLPt43vOHco+u6?=
+ =?us-ascii?Q?EK0JzvU7jqUQLF04ee8h8Xj9FX+qe0mIite1jRuwVXm8lCFFjNfdqWdo6LVK?=
+ =?us-ascii?Q?uMgueWdHwV7DufHWk93VTWvRMLHthx5MimB1sVxh507W9zSX9vu5wW1Ziknp?=
+ =?us-ascii?Q?RhNb8/Eea37vjqIXUYoIWqlGlBDVm/0/r2BK979BOi8YR8l3hqgBF7fuQkC7?=
+ =?us-ascii?Q?V/e/maDw41wvECCEOWWrd04nFfuN3GNQfMTrCrDiqwz+Dui0jaDag+aMXKSF?=
+ =?us-ascii?Q?3gYn3ZipMqZUYivOnc9lcOfa02G9zQNSF1pVzOMZRw/Eqh/lXPLS6EliDnMo?=
+ =?us-ascii?Q?Y4Ku2LFPBu83IT+YY7qlt8R+1C7k6xQUdp3pIbmt+o3UWHfVK3p+IcCwsRlx?=
+ =?us-ascii?Q?lNLKKB59raKddUFI1v6ac5DlWS7D8LU9lRCobq9kYWNsSKSaenJTKoCKu7C8?=
+ =?us-ascii?Q?lKIz0Ve6QMQRxJn+R7g/X4AuwJpqlmrYDzf+F8niCooIjVwsBeLx1n3+3fhO?=
+ =?us-ascii?Q?7FhZz5RTjuSSOw96n0ARPYvEVewE1lhx2c9vOw=3D=3D?=
+MIME-Version: 1.0
+
+<meta http-equiv=3D"Content-Type" content=3D"text/html; charset=3Dus-ascii"=
+><pre style=3D"word-wrap: break-word"><span style=3D"font-family: Arial; fo=
+nt-size: 14px;">Dear Ronald Bocinsky,<br><br></span><span style=3D"font-fam=
+ily: Arial; font-size: 14px;"><span style=3D"line-height: 115%; font-size: =
+14px;">Thank you for contacting the USDA FOIA Service Center with a Freedom=
+ of Information Act (FOIA) request. Your FOIA request was received by the U=
+SDA FOIA Service Center and will be assigned for processing. Please refer t=
+o FOIA tracking number 2025-FSA-08422-F in all communications regarding thi=
+s request. </span><br><br>Regards, <br>USDA FOIA Service Center</span></pre=
+>
+
