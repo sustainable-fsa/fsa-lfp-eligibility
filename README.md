@@ -58,10 +58,13 @@ tidy dataset for analysis and visualization.
 
 | Variable Name | Description |
 |----|----|
-| `State` | A two-digit FIPS state code |
-| `County` | A three-digit FIPS county code |
-| `State Name` | U.S. state |
-| `County Name` | County or county-equivalent name |
+| `FIPS State Code` | A two-digit FIPS state code |
+| `FIPS County Code` | A three-digit FIPS county code |
+| `FIPS State Name` | U.S. state |
+| `FIPS County Name` | County or county-equivalent name |
+| `FSA State Code` | A two-digit FSA state code (not always FIPS) |
+| `FSA County Code` | A three-digit FSA county code (not always FIPS) |
+| `FSA County Name` | County or county-equivalent name |
 | `Program Year` | Year the data applies to |
 | `Pasture Type` | Pasture classification (e.g., Native, Improved) |
 | `Disaster Type` | Type of disaster (e.g., Drought, Fire) |
@@ -133,10 +136,9 @@ eligibility_counties <-
   dplyr::filter(`Pasture Type` == "Native Pasture",
                 `Program Year` == 2024) |>
   dplyr::transmute(
-    id = paste0(State, County),
+    id = paste0(`FIPS State Code`, `FIPS County Code`),
     `Payment Factor` = factor(`Payment Factor`,
                             levels = 1:5,
-                            labels = paste0(1:5, " Month"),
                             ordered = TRUE)
   ) |>
   dplyr::left_join(
@@ -168,13 +170,13 @@ ggplot(counties) +
   # Use the same color scale used by the LFP
   # https://www.fsa.usda.gov/documents/native-pasture-2024-lfp-01-23-25
   scale_fill_manual(
-    values = c("1 Month" = "#E0E436", 
-               "2 Month" = "#DF9114", 
-               "3 Month" = "#DD2313", 
-               "4 Month" = "#850014", 
-               "5 Month" = "#3B003C"),
+    values = c("1" = "#E0E436", 
+               "2" = "#DF9114", 
+               "3" = "#DD2313", 
+               "4" = "#850014", 
+               "5" = "#3B003C"),
     drop = FALSE,
-    name = "Eligible\nPayments") +
+    name = "Payment\nMonths") +
   labs(title = "FSA LFP Eligibility",
        subtitle = "Native Pasture — 2024") +
   theme_void()

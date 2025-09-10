@@ -29,9 +29,9 @@ dir.create("assets",
 
 readr::read_csv("fsa-lfp-eligibility.csv") %>%
   dplyr::transmute(
-    id = paste0(State, County),
-    state = `State Name`,
-    county = `County Name`,
+    id = paste0(`FIPS State Code`, `FIPS County Code`),
+    state = `FIPS State Name`,
+    county = `FIPS County Name`,
     year = `Program Year`,
     type = `Pasture Type`,
     disaster =`Disaster Type`,
