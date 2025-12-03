@@ -114,8 +114,6 @@ fsa_lfp_eligibility <-
   ) %>%
   dplyr::bind_rows(
     
-    
-    
     readxl::read_excel(
       file.path(
         tempdir(),
@@ -142,9 +140,7 @@ fsa_lfp_eligibility <-
       dplyr::filter(`Note (FOIA 2025-FSA-04690-F Bocinsky)` != "Not Eligible",
                     !(`FSA County Name` %in% c("Kootenai, North Shoshone",
                                            "Benewah, South Shoshone")))
-    
-    
-    
+
   ) %>%
   dplyr::mutate(
     # Recode weird FIPS codes
