@@ -23,6 +23,8 @@ editor_options:
 library(sf)
 library(magrittr)
 
+end_year = 2024
+
 dir.create("assets",
            recursive = TRUE,
            showWarnings = FALSE)
@@ -40,6 +42,7 @@ readr::read_csv("fsa-lfp-eligibility.csv") %>%
     payment_type = ifelse(is.na(`Payment Factor`), "Eligible", paste(`Payment Factor`, "Month"))) %>%
   dplyr::distinct(id, year, type, disaster, .keep_all = TRUE) %>%
   dplyr::arrange(id, type, dplyr::desc(year), disaster) %>%
+  dplyr::filter(year <= end_year) %>%
   readr::write_csv(
     file.path(
       "assets",
@@ -68,7 +71,7 @@ d3.extent(data, d => d.year),
 {
 step: 1, 
 label: "Year",
-value: 2024
+value: d3.max(data, d => d.year)
 }
 )
 

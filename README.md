@@ -93,7 +93,7 @@ The Quarto dashboard
 </iframe>
 
 Access a full-screen version of the dashboard at:  
-<https://sustainable-fsa.github.io/fsa-lfp-eligibility/fsa-lfp-eligibility.html>
+<https://sustainable-fsa.com/fsa-lfp-eligibility/fsa-lfp-eligibility.html>
 
 ------------------------------------------------------------------------
 
@@ -182,7 +182,7 @@ ggplot(counties) +
   theme_void()
 ```
 
-<img src="./example-1.png" style="display: block; margin: auto;" />
+<img src="./example-1.png" alt="" style="display: block; margin: auto;" />
 
 ------------------------------------------------------------------------
 
@@ -193,7 +193,7 @@ If using this data in published work, please cite:
 > USDA Farm Service Agency. *Livestock Forage Disaster Program
 > Eligibility, 2008–2024*. FOIA request 2025-FSA-08422-F by R. Kyle
 > Bocinsky. Accessed via GitHub archive, YYYY.
-> <https://sustainable-fsa.github.io/fsa-lfp-eligibility/>
+> <https://sustainable-fsa.com/fsa-lfp-eligibility/>
 
 ------------------------------------------------------------------------
 
