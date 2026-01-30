@@ -9,16 +9,17 @@ editor_options:
 [![GitHub Release](https://img.shields.io/github/v/release/sustainable-fsa/fsa-lfp-eligibility?label=GitHub%20Release&color=%239c27b0)](https://github.com/sustainable-fsa/fsa-lfp-eligibility)
 [![DOI](https://zenodo.org/badge/587852382.svg)](https://zenodo.org/badge/latestdoi/587852382)
 
-# FSA Annual County Eligibility Data from the Livestock Forage Disaster Program, 2008–2024
+# FSA Annual County Eligibility Data from the Livestock Forage Disaster Program, 2008–2025
 
 This repository is an archive of the annual county-level eligibility data for the [Livestock Forage Disaster Program (LFP)](https://www.fsa.usda.gov/resources/programs/livestock-forage-disaster-program-lfp). 
 
-The data in this repository were acquired via FOIA request **2025-FSA-08422-F** by R. Kyle Bocinsky (Montana Climate Office) and fulfilled on August 7, 2025. This replaces previously filed and fulfilled FOIA response covering 2012–2022 (2023-FSA-00937-F) and 2008–2024 (2025-FSA-04690-F). All FOIA responses, including the original Excel workbooks, are archived in the [`foia`](./foia) directory.
+The data in this repository were acquired via FOIA requests **2025-FSA-04690-F**, **2025-FSA-08422-F**, and **2026-FSA-02433-F** by R. Kyle Bocinsky (Montana Climate Office). This replaces previously filed and fulfilled FOIA response covering 2012–2022 (**2023-FSA-00937-F**). All FOIA responses, including the original Excel workbooks, are archived in the [`foia`](./foia) directory.
 
 ## 🗂️ Contents
 
-- [`foia/2025-FSA-08422-F Bocinsky.zip`](./foia/2025-FSA-08422-F Bocinsky.zip) — FOIA data and correspondence
-- [`foia/2025-FSA-04690-F Bocinsky.zip`](./foia/2025-FSA-04690-F Bocinsky.zip) — previous FOIA data and correspondence (archived)
+- [`foia/2026-FSA-02433-F Bocinsky.zip`](./foia/2026-FSA-02433-F Bocinsky.zip) — 2025 eligibility data
+- [`foia/2025-FSA-08422-F Bocinsky.zip`](./foia/2025-FSA-08422-F Bocinsky.zip) — 2012 through July 2025 eligibility data
+- [`foia/2025-FSA-04690-F Bocinsky.zip`](./foia/2025-FSA-04690-F Bocinsky.zip) — 2008 through 2024 eligibility data (incomplete)
 - [`foia/2023-FSA-00937-F Bocinsky.zip`](./foia/2023-FSA-00937-F Bocinsky.zip) — previous FOIA data and correspondence (archived)
 - [`fsa-lfp-eligibility.csv`](./fsa-lfp-eligibility.csv) — cleaned and consolidated data
 - [`fsa-lfp-eligibility.R`](./fsa-lfp-eligibility.R) — processing script
@@ -29,9 +30,9 @@ The data in this repository were acquired via FOIA request **2025-FSA-08422-F** 
 
 ## 📥 Input Data: FOIA Excel Workbooks
 
-The FOIA response contains LFP eligibility data from **2012 through July, 2025** for each pasture type, county, and program year. These have been supplemented with previously-received FOIA data (FOIA 2025-FSA-04690-F Bocinsky) that included eligibility determinations since 2008, but not many of the other variables requested. Each program year was delivered in individual Microsoft Excel files.
+The FOIA response contains LFP eligibility data from **2012 through 2025** for each pasture type, county, and program year. FOIA **2025-FSA-04690-F Bocinsky** includes eligibility determinations from 2008 through 2024, but not many of the other variables requested. Each program year was delivered in individual Microsoft Excel files.
 
-Column names and data can vary subtly by year. The processing workflow in [`fsa-lfp-eligibility.R`](./fsa-lfp-eligibility.R) harmonizes the files, and appends the 2008 through 2011 data from the earlier FOIA.
+Column names and data can vary subtly by year. The processing workflow in [`fsa-lfp-eligibility.R`](./fsa-lfp-eligibility.R) harmonizes the files from , and appends the 2008 through 2011 data from the earlier FOIA.
 
 ---
 
@@ -110,12 +111,12 @@ counties <-
   dplyr::summarise(.groups = "drop") |>
   sf::st_cast("MULTIPOLYGON")
 
-## Calculate the 2024 LFP Eligibility for Native Pasture, and
+## Calculate the 2025 LFP Eligibility for Native Pasture, and
 ## combine with the county data
 eligibility_counties <-
   eligibility |>
   dplyr::filter(`Pasture Type` == "Native Pasture",
-                `Program Year` == 2024) |>
+                `Program Year` == 2025) |>
   dplyr::transmute(
     id = paste0(`FIPS State Code`, `FIPS County Code`),
     `Payment Factor` = factor(`Payment Factor`,
@@ -159,7 +160,7 @@ ggplot(counties) +
     drop = FALSE,
     name = "Payment\nMonths") +
   labs(title = "FSA LFP Eligibility",
-       subtitle = "Native Pasture — 2024") +
+       subtitle = "Native Pasture — 2025") +
   theme_void()
 ```
 
@@ -169,7 +170,7 @@ ggplot(counties) +
 
 If using this data in published work, please cite:
 
-> USDA Farm Service Agency. *Livestock Forage Disaster Program Eligibility, 2008–2024*. FOIA request 2025-FSA-08422-F by R. Kyle Bocinsky. Accessed via GitHub archive, YYYY. https://sustainable-fsa.com/fsa-lfp-eligibility/
+> USDA Farm Service Agency. *Livestock Forage Disaster Program Eligibility, 2008–2025*. FOIA requests *2025-FSA-04690-F*, *2025-FSA-08422-F*, and *2026-FSA-02433-F* by R. Kyle Bocinsky. Accessed via GitHub archive, YYYY. https://sustainable-fsa.com/fsa-lfp-eligibility/
 
 ---
 

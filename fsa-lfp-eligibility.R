@@ -4,6 +4,12 @@ library(quarto)
 library(archive)
 library(tigris)
 
+## FOIA 2026-FSA-02433-F Bocinsky includes all of 2025
+archive::archive_extract(
+  archive = "foia/2026-FSA-02433-F Bocinsky.zip",
+  dir = tempdir()
+)
+
 ## FOIA 2025-FSA-08422-F Bocinsky includes 2012--July 2025
 archive::archive_extract(
   archive = "foia/2025-FSA-08422-F Bocinsky.zip",
@@ -17,17 +23,34 @@ archive::archive_extract(
 )
 
 fsa_lfp_eligibility <-
-  file.path(tempdir(),
-            "2025-FSA-08422-F Bocinsky",
-            "Final Data") %>%
-  list.files(full.names = TRUE,
-             pattern = "xlsx") %>%
-  purrr::map(\(x){
-    readxl::read_excel(x, 
-                       col_types = "text") %>%
-      rename_with(~ gsub("_", " ", .))
-  }) %>%
-  dplyr::bind_rows() %>%
+  c(
+    file.path(tempdir(),
+              "2026-FSA-02433-F Bocinsky",
+              "Final Data") %>%
+      list.files(full.names = TRUE,
+                 pattern = "xlsx"),
+    file.path(tempdir(),
+              "2025-FSA-08422-F Bocinsky",
+              "Final Data") %>%
+      list.files(full.names = TRUE,
+                 pattern = "xlsx")
+  ) %>%
+  {
+    tibble::tibble(
+      file = ., 
+      file_datestamp = stringr::str_extract(.,"\\d{8}") %>%
+        lubridate::as_date()
+    )
+  } %>%
+  dplyr::mutate(
+    data = purrr::map(file, \(x){
+      readxl::read_excel(x, 
+                         col_types = "text") %>%
+        rename_with(~ gsub("_", " ", .))
+    }),
+    file = stringr::str_remove(file, paste0(tempdir(), "/"))
+  ) %>%
+  tidyr::unnest(data) %>%
   dplyr::mutate(`FSA ST CODE` = ifelse(is.na(`FSA ST CODE`), stringr::str_trunc(`FSA STATE`, 2, side = "right", ellipsis = ""), `FSA ST CODE`),
                 `FSA CNTY CODE` = ifelse(is.na(`FSA CNTY CODE`), stringr::str_trunc(`FSA State/County CODE`, 3, side = "left", ellipsis = ""), `FSA CNTY CODE`),
                 `FSA CNTY CODE` = ifelse(is.na(`FSA CNTY CODE`), stringr::str_trunc(`FSA CODE`, 3, side = "left", ellipsis = ""), `FSA CNTY CODE`),
@@ -35,6 +58,8 @@ fsa_lfp_eligibility <-
                 `PAYMENT FACTOR` = ifelse(is.na(`PAYMENT FACTOR`), `Eligible Payment Months`, `PAYMENT FACTOR`),
                 `PAYMENT FACTOR` = ifelse(is.na(`PAYMENT FACTOR`), `LOWEST`, `PAYMENT FACTOR`)) %>%
   dplyr::select(
+    file,
+    file_datestamp,
     `FSA State Code` = `FSA ST CODE`,
     `FSA County Code` = `FSA CNTY CODE`,
     `FSA County Name` = `FSA COUNTY NAME`,
@@ -52,20 +77,23 @@ fsa_lfp_eligibility <-
     `Disaster Type` = "Drought",
     dplyr::across(`D2 START DATE`:`D4B END`, lubridate::as_date),
     `Grazing Period Start Date` =
-      ifelse(stringr::str_detect(`Grazing Period Start Date`, "/"),
-             lubridate::mdy(`Grazing Period Start Date`),
-             as.Date(as.numeric(`Grazing Period Start Date`), origin = "1899-12-30")) %>%
-      lubridate::as_date(),
+      dplyr::case_when(
+        stringr::str_detect(`Grazing Period Start Date`, "/") ~ lubridate::mdy(`Grazing Period Start Date`),
+        .default = as.numeric(`Grazing Period Start Date`) %>%
+          lubridate::as_date(origin = "1899-12-30")
+      ),
     `Grazing Period End Date` =
-      ifelse(stringr::str_detect(`Grazing Period End Date`, "/"),
-             lubridate::mdy(`Grazing Period End Date`),
-             as.Date(as.numeric(`Grazing Period End Date`), origin = "1899-12-30")) %>%
-      lubridate::as_date(),
+      dplyr::case_when(
+        stringr::str_detect(`Grazing Period End Date`, "/") ~ lubridate::mdy(`Grazing Period End Date`),
+        .default = as.numeric(`Grazing Period End Date`) %>%
+          lubridate::as_date(origin = "1899-12-30")
+      ),
     `Date of Qualifying Drought` =
-      ifelse(stringr::str_detect(`Date of Qualifying Drought`, "/"),
-             lubridate::mdy(`Date of Qualifying Drought`),
-             as.Date(as.numeric(`Date of Qualifying Drought`), origin = "1899-12-30")) %>%
-      lubridate::as_date(),
+      dplyr::case_when(
+        stringr::str_detect(`Date of Qualifying Drought`, "/") ~ lubridate::mdy(`Date of Qualifying Drought`),
+        .default = as.numeric(`Date of Qualifying Drought`) %>%
+          lubridate::as_date(origin = "1899-12-30")
+      ),
     dplyr::across(
       c(`Program Year`, `Drought Factor`, `Maximum Eligible Payment Months`, `Payment Factor`),
       as.integer),
@@ -117,21 +145,30 @@ fsa_lfp_eligibility <-
     readxl::read_excel(
       file.path(
         tempdir(),
+        "2025-FSA-04690-F Bocinsky",
+        "Final Data",
         "LFP_Pasture_Grazing_Report.xlsx"
       ),
       col_types = "text"
     ) %>%
       dplyr::mutate(
+        file = file.path(
+          "2025-FSA-04690-F Bocinsky",
+          "Final Data",
+          "LFP_Pasture_Grazing_Report.xlsx"
+        ),
         `FSA State Code` = stringr::str_pad(state_fsa_code, width = 2, pad = "0"),
         `FSA County Code` = stringr::str_pad(county_fsa_code, width = 3, pad = "0"),
         `FSA County Name` = county_name,
         `Program Year` = as.integer(program_year),
         `Pasture Type` = pasture_type,
         `Disaster Type` = disaster_type,
-        `Date of Qualifying Drought` = ifelse(stringr::str_detect(disaster_start_date, "/"),
-                                              lubridate::mdy(disaster_start_date),
-                                              as.Date(as.numeric(disaster_start_date), origin = "1899-12-30")) %>%
-          lubridate::as_date(),
+        `Date of Qualifying Drought` =
+          dplyr::case_when(
+            stringr::str_detect(disaster_start_date, "/") ~ lubridate::mdy(disaster_start_date),
+            .default = as.numeric(disaster_start_date) %>%
+              lubridate::as_date(origin = "1899-12-30")
+          ),
         `Payment Factor` = stringr::str_remove(payment_type, " Month") %>% 
           as.integer(),
         `Note (FOIA 2025-FSA-04690-F Bocinsky)` = note_text,
@@ -139,8 +176,8 @@ fsa_lfp_eligibility <-
       ) %>%
       dplyr::filter(`Note (FOIA 2025-FSA-04690-F Bocinsky)` != "Not Eligible",
                     !(`FSA County Name` %in% c("Kootenai, North Shoshone",
-                                           "Benewah, South Shoshone")))
-
+                                               "Benewah, South Shoshone")))
+    
   ) %>%
   dplyr::mutate(
     # Recode weird FIPS codes
@@ -169,6 +206,8 @@ fsa_lfp_eligibility <-
     `FSA County Name` = stringr::str_to_upper(`FSA County Name`)
   ) %>%
   dplyr::select(
+    file,
+    file_datestamp,
     `FIPS State Code`,
     `FIPS County Code`,
     `FSA State Code`,
@@ -186,6 +225,13 @@ fsa_lfp_eligibility <-
     `Payment Factor`,
     `Note (FOIA 2025-FSA-04690-F Bocinsky)`
   ) %>%
+  dplyr::arrange(`FIPS State Code`,
+                 `FIPS County Code`,
+                 dplyr::desc(`Program Year`),
+                 dplyr::desc(file_datestamp),
+                 `Pasture Type`,
+                 `Disaster Type`
+                 ) %>%
   dplyr::distinct(
     `FIPS State Code`,
     `FIPS County Code`,
@@ -194,13 +240,13 @@ fsa_lfp_eligibility <-
     `Disaster Type`,
     .keep_all = TRUE
   ) %>%
-  dplyr::arrange(`Program Year`,
+  dplyr::arrange(dplyr::desc(`Program Year`),
                  `FIPS State Code`,
                  `FIPS County Code`,
                  `FSA County Name`,
                  `Disaster Type`,
                  `Pasture Type`
-                 ) %>%
+  ) %>%
   dplyr::left_join(
     dplyr::bind_rows(
       tigris::counties(cb = TRUE) %>%
@@ -210,7 +256,7 @@ fsa_lfp_eligibility <-
         dplyr::left_join(
           tigris::states(cb = TRUE, year = 2014) %>%
             dplyr::transmute(STATEFP, STATE_NAME = NAME)
-          ) %>%
+        ) %>%
         dplyr::arrange(STATEFP, COUNTYFP)
     ) %>%
       dplyr::transmute(`FIPS State Code` = STATEFP,
@@ -219,7 +265,8 @@ fsa_lfp_eligibility <-
                        `FIPS State Name` = STATE_NAME) %>%
       tibble::as_tibble() %>%
       dplyr::distinct() %>%
-      dplyr::arrange(`FIPS State Code`, `FIPS County Code`)
+      dplyr::arrange(`FIPS State Code`, `FIPS County Code`),
+    relationship = "many-to-many"
   ) %>%
   dplyr::select(
     `FIPS State Code`,
