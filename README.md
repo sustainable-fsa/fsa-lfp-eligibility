@@ -26,13 +26,13 @@ workbooks, are archived in the [`foia`](./foia) directory.
   — 2008 through 2024 eligibility data (incomplete)
 - [`foia/2023-FSA-00937-F Bocinsky.zip`](./foia/2023-FSA-00937-F%20Bocinsky.zip)
   — previous FOIA data and correspondence (archived)
-- [`fsa-lfp-eligibility.csv`](./fsa-lfp-eligibility.csv) — cleaned and
-  consolidated data
+- [`fsa-lfp-eligibility.csv`](https://data.sustainable-fsa.com/fsa-lfp-eligibility/fsa-lfp-eligibility.csv)
+  — cleaned and consolidated data
 - [`fsa-lfp-eligibility.R`](./fsa-lfp-eligibility.R) — processing script
 - [`fsa-lfp-eligibility.qmd`](./fsa-lfp-eligibility.qmd) — Quarto
   dashboard source
-- [`fsa-lfp-eligibility.html`](./fsa-lfp-eligibility.html) — interactive
-  summary dashboard
+- [`fsa-lfp-eligibility.html`](https://data.sustainable-fsa.com/fsa-lfp-eligibility/fsa-lfp-eligibility.html)
+  — interactive summary dashboard
 
 ------------------------------------------------------------------------
 
@@ -53,8 +53,9 @@ FOIA.
 
 ## 📤 Output Data: Cleaned CSV
 
-The file [`fsa-lfp-eligibility.csv`](./fsa-lfp-eligibility.csv) is a
-tidy dataset for analysis and visualization.
+The file
+[`fsa-lfp-eligibility.csv`](https://data.sustainable-fsa.com/fsa-lfp-eligibility/fsa-lfp-eligibility.csv)
+is a tidy dataset for analysis and visualization.
 
 ### Variables in Output
 
@@ -94,8 +95,8 @@ The Quarto dashboard
 
 </iframe>
 
-Access a full-screen version of the dashboard at:  
-<https://sustainable-fsa.com/fsa-lfp-eligibility/fsa-lfp-eligibility.html>
+Access a full-screen version of the dashboard at:\
+<https://data.sustainable-fsa.com/fsa-lfp-eligibility/fsa-lfp-eligibility.html>
 
 ------------------------------------------------------------------------
 
@@ -192,11 +193,22 @@ ggplot(counties) +
 
 If you use this data in published work, please cite:
 
-> USDA Farm Service Agency. *Livestock Forage Disaster Program Eligibility, 2008–2025*. Obtained under FOIA requests 2025-FSA-04690-F, 2025-FSA-08422-F, and 2026-FSA-02433-F; curated and archived by R. Kyle Bocinsky, Montana Climate Office, University of Montana. Sustainable FSA project. Accessed YYYY-MM-DD. <https://sustainable-fsa.com/fsa-lfp-eligibility/>
+> USDA Farm Service Agency. *Livestock Forage Disaster Program
+> Eligibility, 2008–2025*. Obtained under FOIA requests
+> 2025-FSA-04690-F, 2025-FSA-08422-F, and 2026-FSA-02433-F; curated and
+> archived by R. Kyle Bocinsky, Montana Climate Office, University of
+> Montana. Sustainable FSA project. Accessed YYYY-MM-DD.
+> <https://sustainable-fsa.com/fsa-lfp-eligibility/>
 
-Machine-readable metadata are in [`CITATION.cff`](CITATION.cff); GitHub's **Cite this repository** button (top right of the repo page) renders it as APA or BibTeX.
+Machine-readable metadata are in [`CITATION.cff`](CITATION.cff);
+GitHub’s **Cite this repository** button (top right of the repo page)
+renders it as APA or BibTeX.
 
-**Acknowledgment**: This work is part of the [*Enhancing Sustainable Disaster Relief in FSA Programs*](https://www.ars.usda.gov/research/project/?accnNo=444612) project, supported by the USDA Office of the Chief Economist, Office of Energy and Environmental Policy, and the USDA Climate Hubs.
+**Acknowledgment**: This work is part of the [*Enhancing Sustainable
+Disaster Relief in FSA
+Programs*](https://www.ars.usda.gov/research/project/?accnNo=444612)
+project, supported by the USDA Office of the Chief Economist, Office of
+Energy and Environmental Policy, and the USDA Climate Hubs.
 
 ## 📄 License
 
@@ -227,8 +239,8 @@ Locator**](https://offices.sc.egov.usda.gov/locator/app)
 This project is part of:
 
 **[*Enhancing Sustainable Disaster Relief in FSA
-Programs*](https://www.ars.usda.gov/research/project/?accnNo=444612)**  
-Supported by USDA OCE/OEEP and USDA Climate Hubs  
+Programs*](https://www.ars.usda.gov/research/project/?accnNo=444612)**\
+Supported by USDA OCE/OEEP and USDA Climate Hubs\
 Prepared by the [Montana Climate Office](https://climate.umt.edu)
 
 ------------------------------------------------------------------------

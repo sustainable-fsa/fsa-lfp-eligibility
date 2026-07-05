@@ -21,10 +21,10 @@ The data in this repository were acquired via FOIA requests **2025-FSA-04690-F**
 - [`foia/2025-FSA-08422-F Bocinsky.zip`](./foia/2025-FSA-08422-F Bocinsky.zip) — 2012 through July 2025 eligibility data
 - [`foia/2025-FSA-04690-F Bocinsky.zip`](./foia/2025-FSA-04690-F Bocinsky.zip) — 2008 through 2024 eligibility data (incomplete)
 - [`foia/2023-FSA-00937-F Bocinsky.zip`](./foia/2023-FSA-00937-F Bocinsky.zip) — previous FOIA data and correspondence (archived)
-- [`fsa-lfp-eligibility.csv`](./fsa-lfp-eligibility.csv) — cleaned and consolidated data
+- [`fsa-lfp-eligibility.csv`](https://data.sustainable-fsa.com/fsa-lfp-eligibility/fsa-lfp-eligibility.csv) — cleaned and consolidated data
 - [`fsa-lfp-eligibility.R`](./fsa-lfp-eligibility.R) — processing script
 - [`fsa-lfp-eligibility.qmd`](./fsa-lfp-eligibility.qmd) — Quarto dashboard source
-- [`fsa-lfp-eligibility.html`](./fsa-lfp-eligibility.html) — interactive summary dashboard
+- [`fsa-lfp-eligibility.html`](https://data.sustainable-fsa.com/fsa-lfp-eligibility/fsa-lfp-eligibility.html) — interactive summary dashboard
 
 ---
 
@@ -38,7 +38,7 @@ Column names and data can vary subtly by year. The processing workflow in [`fsa-
 
 ## 📤 Output Data: Cleaned CSV
 
-The file [`fsa-lfp-eligibility.csv`](./fsa-lfp-eligibility.csv) is a tidy dataset for analysis and visualization.
+The file [`fsa-lfp-eligibility.csv`](https://data.sustainable-fsa.com/fsa-lfp-eligibility/fsa-lfp-eligibility.csv) is a tidy dataset for analysis and visualization.
 
 ### Variables in Output
 
@@ -76,7 +76,7 @@ The Quarto dashboard [`fsa-lfp-eligibility.qmd`](./fsa-lfp-eligibility.qmd) prov
 style="width:100%;height:40vw;"></iframe>
 
 Access a full-screen version of the dashboard at:  
-<https://sustainable-fsa.com/fsa-lfp-eligibility/fsa-lfp-eligibility.html>
+<https://data.sustainable-fsa.com/fsa-lfp-eligibility/fsa-lfp-eligibility.html>
 
 ---
 
