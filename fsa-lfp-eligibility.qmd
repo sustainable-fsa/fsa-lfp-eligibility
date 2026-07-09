@@ -160,11 +160,40 @@ countiesFiltered = {
 
 ```
 
+```{ojs cardsize}
+//| output: false
+
+// Reactive card dimensions — uses #map (created by Quarto from label: map) to
+// find the card body. Sizing the plot from a ResizeObserver makes the FIRST
+// render fill the card; the stdlib `width` is only re-evaluated on window
+// resize, which left the initial paint at the wrong scale.
+cardSize = Generators.observe(notify => {
+  let ro;
+  const check = setInterval(() => {
+    const cardBody = document.querySelector('#map')?.closest('.card-body');
+    if (cardBody) {
+      clearInterval(check);
+      ro = new ResizeObserver(([entry]) => {
+        const { width, height } = entry.contentRect;
+        if (width > 0 && height > 0) notify({ width, height });
+      });
+      ro.observe(cardBody);
+    }
+  }, 50);
+  return () => {
+    clearInterval(check);
+    if (ro) ro.disconnect();
+  };
+})
+```
+
 ```{ojs}
 //| label: map
 //| title: FSA Livestock Forage Disaster Program Eligibility
 
 Plot.plot({
+width: cardSize.width,
+height: Math.max(300, cardSize.height - 70),  // leave room for the legend
 projection: {
     type: "albers",
     domain: counties
