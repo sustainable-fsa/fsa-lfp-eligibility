@@ -171,6 +171,8 @@ ggplot(counties) +
 If you use this data in published work, please cite:
 
 > USDA Farm Service Agency. *Livestock Forage Disaster Program Eligibility, 2008–2025*. Obtained under FOIA requests 2025-FSA-04690-F, 2025-FSA-08422-F, and 2026-FSA-02433-F; curated and archived by R. Kyle Bocinsky, Montana Climate Office, University of Montana. Sustainable FSA project. Accessed YYYY-MM-DD. <https://sustainable-fsa.com/fsa-lfp-eligibility/>
+>
+> DOI: <https://doi.org/10.5281/zenodo.15491626>
 
 Machine-readable metadata are in [`CITATION.cff`](CITATION.cff); GitHub's **Cite this repository** button (top right of the repo page) renders it as APA or BibTeX.
 
