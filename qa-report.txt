@@ -1,0 +1,79 @@
+FSA LFP Eligibility archive — QA report
+Generated: 2026-07-29 21:23:10 MDT
+
+Grain: one record per FSA county, program year, pasture type, and disaster
+type. FSA administers some Census counties as several offices and determines
+eligibility for each separately, so a Census county may carry several records.
+
+Records published: 51348
+FSA counties: 2843
+Census counties: 2836
+Program years: 2008-2025
+
+Everything below is reported, not enforced.
+
+FSA counties not defined in fsa-counties-dd17/dd22: 17 (60 records)
+  Expected, not an error. FSA determines eligibility at county grain while those
+  archives describe its office grain, so FSA names counties they do not define —
+  Puerto Rico municipios, Alaska boroughs, and counties administered from a
+  neighbouring office. FSA's codes also change: 46113 (Shannon, SD) resolves only
+  against dd17 and 46102 (Oglala Lakota) only against dd22.
+  FSA State Code,FSA County Code,FSA County Name,records
+  02,020,ANCHORAGE,1
+  02,122,KENAI PENINSULA,1
+  02,130,KETCHIKAN GATEW,1
+  02,170,MATANUSKA-SUSIT,1
+  12,087,MONROE,1
+  34,017,HUDSON,2
+  46,102,OGLALA LAKOTA,14
+  54,059,MINGO,3
+  72,009,AIBONITO,4
+  72,035,CAYEY,4
+  72,041,CIDRA,4
+  72,043,COAMO,4
+  72,045,COMERIO,4
+  72,057,GUAYAMA,4
+  72,105,NARANJITO,4
+  72,107,OROCOVIS,4
+  72,123,SALINAS,4
+
+Records with no FSA county name, reported as "???": 40 across 9 FSA counties
+  FSA State Code,FSA County Code,Program Year,records
+  12,025,2025,5
+  19,156,2020,4
+  19,156,2023,4
+  23,002,2020,3
+  23,004,2020,3
+  27,112,2021,2
+  27,120,2021,3
+  27,138,2021,2
+  27,138,2023,4
+  29,193,2018,1
+  29,193,2023,3
+  32,035,2020,1
+  32,035,2021,1
+  32,035,2022,1
+  32,035,2023,1
+  32,035,2024,1
+  32,035,2025,1
+
+Puerto Rico reporting grain by program year:
+  The 2025-FSA-04690 response reports at municipio level; the later files report
+  consolidated FSA offices. Anyone aggregating Puerto Rico needs to know which.
+  Program Year,FSA office,municipio
+  2015,12,4
+  2016,12,0
+  2019,12,0
+  2020,8,0
+  2022,0,44
+
+Census counties carrying several FSA counties: 7
+  A join on FIPS returns several rows for these; decide how to combine them.
+  FIPS State Code,FIPS County Code,FIPS State Name,FIPS County Name,FSA Counties,FSA Codes,Records
+  23,003,Maine,Aroostook,3,23002 23003 23004,9
+  19,155,Iowa,Pottawattamie,2,19155 19156,32
+  27,111,Minnesota,Otter Tail,2,27111 27112,10
+  27,119,Minnesota,Polk,2,27119 27120,18
+  27,137,Minnesota,St. Louis,2,27137 27138,22
+  32,023,Nevada,Nye,2,32023 32035,28
+  46,102,South Dakota,Oglala Lakota,2,46102 46113,28
