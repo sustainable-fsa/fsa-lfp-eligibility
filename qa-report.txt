@@ -9,7 +9,82 @@ FSA counties: 2843
 Census counties: 2836
 Program years: 2008-2025
 
+Events published: 105719
+  fsa-lfp-eligibility-events.csv holds the same determinations at event grain —
+  one row per qualifying drought tier, matching the shape of the
+  fsa-lfp-eligibility-reanalysis archive. It does not round-trip to the record
+  count above; the reconciliation is the two tables below.
+
 Everything below is reported, not enforced.
+
+Determinations yielding no event: 514
+  A determination with no qualifying drought tier has nothing to reshape. Fire
+  determinations never carry one. The rest are drought determinations from the
+  2025-FSA-04690 response, which reports eligibility without the tier dates. 157
+  of those do name a tier in `Note`, but only for program years the tier columns
+  already cover, so the events file reads the columns and ignores the note.
+  Program Year,Disaster Type,records
+  2008,Fire,2
+  2009,Fire,6
+  2010,Fire,4
+  2011,Fire,7
+  2012,Drought,15
+  2012,Fire,12
+  2013,Drought,36
+  2013,Fire,15
+  2014,Drought,7
+  2014,Fire,13
+  2015,Drought,8
+  2015,Fire,5
+  2016,Fire,7
+  2017,Drought,2
+  2017,Fire,22
+  2018,Drought,11
+  2018,Fire,31
+  2019,Drought,2
+  2019,Fire,23
+  2020,Drought,20
+  2020,Fire,19
+  2021,Drought,107
+  2021,Fire,6
+  2022,Drought,55
+  2022,Fire,16
+  2023,Drought,11
+  2023,Fire,5
+  2024,Drought,18
+  2024,Fire,29
+
+Events with no reported date: 718
+  Kept, not dropped: the tier is known and the date is not. Program years
+  2008-2011 carry no tier date columns at all, so `Date of Qualifying Drought` is
+  the only date available and it is blank on these.
+  Program Year,Qualifying Drought Event,events
+  2011,D2,246
+  2011,D3a,34
+  2011,D3b,267
+  2011,D4a,171
+
+Program years whose event drought factors are wholly derived: 7
+  FSA states `Drought Factor` on no record in these years, so the events file
+  derives every one from the tier and the ladder in force. The derivation
+  reproduces FSA's own value on all 29,893 records where FSA does state it, and
+  `Payment Factor` equals min(drought factor, Maximum Eligible Payment Months) on
+  all 44,096 records carrying both, so the ladder is not in doubt.
+  Program Year,records,Drought Factor stated
+  2008,1866,0
+  2009,949,0
+  2010,745,0
+  2011,3178,0
+  2022,5553,0
+  2023,5548,0
+  2024,3186,0
+
+The 2008-2011 A/B sub-tier split assumes `Payment Factor` is uncapped:
+  Those years carry no tier columns, so the events file reads the tier from
+  `Note` and splits D3 on `Payment Factor` — 2 for D3 at any time, 3 for D3 over
+  at least 4 weeks. `Maximum Eligible Payment Months` and both grazing dates are
+  absent for the era, so the cap cannot be recomputed to check. No record shows
+  it binding: D2 is always 1, D4 always 3, and D3 is never 1.
 
 FSA counties not defined in fsa-counties-dd17/dd22: 17 (60 records)
   Expected, not an error. FSA determines eligibility at county grain while those

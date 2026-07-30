@@ -23,6 +23,8 @@ The data in this repository were acquired via FOIA requests **2025-FSA-04690-F**
 - [`foia/2023-FSA-00937-F Bocinsky.zip`](./foia/2023-FSA-00937-F Bocinsky.zip) — previous FOIA data and correspondence (archived)
 - [`fsa-lfp-eligibility.csv`](https://data.sustainable-fsa.com/fsa-lfp-eligibility/fsa-lfp-eligibility.csv) — cleaned and consolidated data, one record per FSA county, program year, pasture type, and disaster type
 - [`fsa-lfp-eligibility.parquet`](https://data.sustainable-fsa.com/fsa-lfp-eligibility/fsa-lfp-eligibility.parquet) — the same records as Parquet
+- [`fsa-lfp-eligibility-events.csv`](https://data.sustainable-fsa.com/fsa-lfp-eligibility/fsa-lfp-eligibility-events.csv) — the same determinations reshaped long, one record per qualifying drought event
+- [`fsa-lfp-eligibility-events.parquet`](https://data.sustainable-fsa.com/fsa-lfp-eligibility/fsa-lfp-eligibility-events.parquet) — the same event records as Parquet
 - [`qa-report.txt`](https://data.sustainable-fsa.com/fsa-lfp-eligibility/qa-report.txt) — QA summary and flagged records for the published data
 - [`fsa-lfp-eligibility.R`](./fsa-lfp-eligibility.R) — processing script
 - [`fsa-lfp-eligibility.qmd`](./fsa-lfp-eligibility.qmd) — Quarto dashboard source
@@ -31,7 +33,7 @@ The data in this repository were acquired via FOIA requests **2025-FSA-04690-F**
 
 ## ☁️ Archive Hosting & Automated Publishing
 
-The consolidated data (`fsa-lfp-eligibility.csv` and `fsa-lfp-eligibility.parquet`), the QA report (`qa-report.txt`), the `assets/` directory the dashboard reads from, and the `foia/` correspondence are all mirrored to S3, served via CloudFront at <https://data.sustainable-fsa.com/fsa-lfp-eligibility/> (browse the [archive listing](https://data.sustainable-fsa.com/fsa-lfp-eligibility/) or [`_manifest.txt`](https://data.sustainable-fsa.com/fsa-lfp-eligibility/_manifest.txt) for a flat index). The interactive dashboard itself is served separately, via GitHub Pages at <https://sustainable-fsa.com/fsa-lfp-eligibility/>.
+The consolidated data (`fsa-lfp-eligibility.csv` and `fsa-lfp-eligibility.parquet`), the event-grain projection of it (`fsa-lfp-eligibility-events.csv` and `fsa-lfp-eligibility-events.parquet`), the QA report (`qa-report.txt`), the `assets/` directory the dashboard reads from, and the `foia/` correspondence are all mirrored to S3, served via CloudFront at <https://data.sustainable-fsa.com/fsa-lfp-eligibility/> (browse the [archive listing](https://data.sustainable-fsa.com/fsa-lfp-eligibility/) or [`_manifest.txt`](https://data.sustainable-fsa.com/fsa-lfp-eligibility/_manifest.txt) for a flat index). The interactive dashboard itself is served separately, via GitHub Pages at <https://sustainable-fsa.com/fsa-lfp-eligibility/>.
 
 Publishing is handled by [`fsa-lfp-eligibility.R`](fsa-lfp-eligibility.R) via the shared [`R/s3-archive.R`](R/s3-archive.R) helpers, and runs automatically in GitHub Actions ([`.github/workflows/fsa-lfp-eligibility.yaml`](.github/workflows/fsa-lfp-eligibility.yaml)) whenever the script, dashboard, or workflow changes, or on manual dispatch. The workflow authenticates to AWS via GitHub OIDC (no long-lived credentials stored in the repo), re-renders the README and dashboard, and commits them back to git only if the rendered output changed.
 
@@ -86,6 +88,158 @@ choosing how to combine them.
 | `Maximum Eligible Payment Months`      | Duration of grazing period, in months                    |
 | `Payment Factor`                       | Number of eligible payments                              |
 | `Note (FOIA 2025-FSA-04690-F Bocinsky)`| for 2008 through 2011, the qualifying drought type       |
+
+---
+
+## 🔄 Output Data: Event Grain
+
+The archive above is **wide** — one record per determination, carrying a column
+pair for each drought tier. The companion
+[reanalysis archive](https://sustainable-fsa.com/fsa-lfp-eligibility-reanalysis/),
+which recomputes eligibility from the US Drought Monitor, publishes the same
+information **long** — one row per qualifying drought event. Comparing the two
+means reshaping this one, so the reshape is published here rather than left to
+every consumer to rediscover:
+[`fsa-lfp-eligibility-events.csv`](https://data.sustainable-fsa.com/fsa-lfp-eligibility/fsa-lfp-eligibility-events.csv)
+and
+[`fsa-lfp-eligibility-events.parquet`](https://data.sustainable-fsa.com/fsa-lfp-eligibility/fsa-lfp-eligibility-events.parquet).
+
+One record per **Census county, FSA county, program year, pasture type, and
+qualifying drought event**. 105,719 events from 50,834 of the 51,348
+determinations.
+
+| Variable Name                     | Description                                                        |
+|-----------------------------------|--------------------------------------------------------------------|
+| `FIPS`                            | Five-digit Census county code (FIPS state + county)                |
+| `FSA County`                      | Five-digit FSA county code (FSA state + county; not always FIPS)   |
+| `Program Year`                    | Year the determination applies to                                  |
+| `Pasture Type`                    | Pasture classification, as FSA reports it                          |
+| `Qualifying Drought Event`        | The tier reached: `D2`, `D3a`, `D3b`, `D4a`, `D4b`; from 2026, `D2a_2026` and `D2b_2026` in place of `D2` |
+| `Qualifying Date`                 | The date the tier was satisfied                                    |
+| `Drought Factor`                  | Monthly payments the event earns — **derived**, see below           |
+| `Maximum Eligible Payment Months` | FSA's cap, from the length of the grazing period                   |
+| `Payment Factor`                  | FSA's payable months, `min(Drought Factor, MEPM)`                  |
+
+### Which date qualifies a tier
+
+Not uniform, and the wide columns do not say so directly. `D2`, `D3B` and `D4B`
+are multi-week tiers, satisfied on their **END**. `D3A` and `D4A` trigger "at any
+time", have no `END` value at all, and are satisfied on their **START**.
+
+| Event | Source column      | Events |
+|-------|--------------------|--------|
+| `D2`  | `D2 END`           | 14,402 |
+| `D3a` | `D3A START DATE`   | 36,041 |
+| `D3b` | `D3B END`          | 24,054 |
+| `D4a` | `D4A START DATE`   | 14,053 |
+| `D4b` | `D4B END`          | 10,431 |
+
+FSA's own `Date of Qualifying Drought` is the **earliest of exactly those five
+dates**, in 22,222 of 22,222 records where it is reported — zero exceptions. That
+is what establishes the mapping rather than assuming it.
+
+Two traps if you reshape the wide file yourself. `D3B START DATE` is a copy of
+`D3A START DATE` in all 24,054 records carrying both, and `D4B START DATE` of
+`D4A START DATE` in all 10,431, so a START-keyed pivot silently double-counts D3
+and D4. And `D3A END`/`D4A END` are empty columns, not missing data.
+
+### Program years 2008–2011
+
+Those years came from a different FOIA response and carry **no tier columns at
+all** — nor grazing dates, nor `Maximum Eligible Payment Months`. The tier
+survives only in `Note`, which does not distinguish the A and B sub-tiers. But
+`Payment Factor` does, because the 2008 Farm Bill ladder pays 2 for D3 "at any
+time" and 3 for D3 "for at least 4 weeks":
+
+| `Note` | `Payment Factor` | Records | Event |
+|--------|------------------|---------|-------|
+| `D2`   | 1                | 2,240   | `D2`  |
+| `D3`   | 2                | 1,561   | `D3a` |
+| `D3`   | 3                | 394     | `D3b` |
+| `D4`   | 3                | 2,543   | `D4a` |
+
+No `D3` record carries any other factor, and there is no `D4b` tier in that era —
+the five-payment "D4 for four weeks" tier arrives with the 2014 Farm Bill. So
+2008–2011 resolves to the same event vocabulary as later years. The split does
+assume `Payment Factor` is uncapped for the era; the cap cannot be recomputed to
+check, since the inputs to it are absent, but no record shows it binding.
+
+### Program year 2026 onward
+
+The rules change again. D2 splits in two — four consecutive weeks earns one payment,
+seven earns two — reinstating a two-payment tier that the 2014 Farm Bill had
+removed. D3 and D4 are unchanged. The events file emits `D2a_2026` and `D2b_2026`
+in place of `D2` for those years, matching the reanalysis vocabulary.
+
+| Program year | Ladder |
+|---|---|
+| 2008–2011 | `D2` 1 · `D3a` 2 · `D3b`/`D4a`/`D4b` 3 |
+| 2012–2025 | `D2` 1 · `D3a` 3 · `D3b`/`D4a` 4 · `D4b` 5 |
+| 2026– | `D2a_2026` 1 · `D2b_2026` 2 · `D3a` 3 · `D3b`/`D4a` 4 · `D4b` 5 |
+
+**FSA has not published a 2026 file yet**, so the two new column names the script
+reads — `D2A END` and `D2B END` — are a projection of FSA's own `D3A`/`D3B` naming,
+not something observed. Both new tiers are duration tiers, unlike the `D3A`/`D3B`
+and `D4A`/`D4B` pairs where only the B half is, so both are satisfied on their END.
+
+The script does not guess quietly. It reads those columns only once they appear, and
+it aborts before writing anything if a 2026 file arrives shaped differently — either
+carrying a tier the payment ladder cannot score, or a tier date column the
+projection does not account for. A rule change cannot slip into the archive
+mispriced; the run fails and the mapping gets revisited.
+
+### `Drought Factor` is derived, not transcribed
+
+FSA's `Drought Factor` in the wide file names the tier that **set the award**, so
+copying it onto every event row would overstate the lower ones. The events file
+derives each event's factor from the ladder in force for its program year instead.
+
+That derivation reproduces FSA's own value on all **29,893** records where FSA
+states one, and `Payment Factor == min(Drought Factor, MEPM)` holds on all
+**44,096** records carrying both. It also fills program years **2022–2024**, where
+FSA left `Drought Factor` blank on every record.
+
+`Maximum Eligible Payment Months` and `Payment Factor` are FSA's own, carried
+unchanged and repeated on each event of a determination, so a payable-months
+comparison needs no join back to the wide file.
+
+### Reconciling against the wide file
+
+The events file does not round-trip. 514 determinations yield no event: 222 fire
+determinations, which carry no drought tier by definition, and 292 drought
+determinations from the 2025-FSA-04690 response, which reports eligibility without
+tier dates. A further 718 events, all in 2011, have a known tier and no reported
+date.
+[`qa-report.txt`](https://data.sustainable-fsa.com/fsa-lfp-eligibility/qa-report.txt)
+breaks all of these out by program year.
+
+### Comparing against the reanalysis
+
+```r
+official <-
+  arrow::read_parquet(
+    "https://data.sustainable-fsa.com/fsa-lfp-eligibility/fsa-lfp-eligibility-events.parquet"
+  ) |>
+  dplyr::mutate(source = "fsa-published")
+
+reanalysis <-
+  arrow::read_parquet(
+    "https://data.sustainable-fsa.com/fsa-lfp-eligibility-reanalysis/fsa-lfp-eligibility-reanalysis.parquet"
+  ) |>
+  dplyr::mutate(dplyr::across(c(source, `Pasture Type`,
+                                `Qualifying Drought Event`), as.character))
+
+dplyr::bind_rows(official, reanalysis)
+```
+
+The reanalysis stores `source`, `Pasture Type` and `Qualifying Drought Event` as
+factors; this archive uses character throughout, matching the wide file it derives
+from. `bind_rows()` reconciles that on its own — the `as.character()` above is
+only to keep the levels from surprising you downstream.
+
+Note that the reanalysis carries `source` because it computes eligibility under
+four different county aggregations of the drought monitor. FSA has one
+determination, so this file has no `source` column; add it when binding, as above.
 
 ---
 
