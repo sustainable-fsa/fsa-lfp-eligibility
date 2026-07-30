@@ -10,22 +10,17 @@ s3_preflight()
 s3_bucket <- Sys.getenv("S3_BUCKET", unset = "sustainable-fsa")
 s3_prefix <- Sys.getenv("S3_PREFIX", unset = "fsa-lfp-eligibility")
 
-# The 2014 Census cartographic boundary files return accented place names as raw
-# latin1 bytes while declaring them UTF-8, so "Doña Ana" arrives as "Do\xf1a Ana".
-# Because Encoding() already reports "UTF-8", iconv(from = "latin1") is a no-op —
-# the declaration has to be reset before re-encoding.
-#
-# Left unrepaired, the two vintages contribute two spellings of the same county,
-# `distinct()` keeps both, and the join below fans out: 29 duplicated records in
-# Doña Ana NM, Comerío PR, and Mayagüez PR.
+# The 2014 Census boundary files return accented names as latin1 bytes declared
+# UTF-8, so "Doña Ana" arrives as "Do\xf1a Ana". Encoding() already reports UTF-8,
+# so the declaration must be reset before re-encoding; iconv(from = "latin1") alone
+# is a no-op.
 repair_latin1 <- function(x) {
   Encoding(x) <- "latin1"
   enc2utf8(x)
 }
 
-# Census county names, from the current vintage plus 2014 for counties since
-# retired or renamed. Exactly one row per FIPS key, so the join below can assert
-# many-to-one.
+# Census county names, current vintage plus 2014 for counties since retired or
+# renamed. One row per FIPS key, so the join below can assert many-to-one.
 census <-
   dplyr::bind_rows(
     tigris::counties(cb = TRUE) %>%
@@ -38,8 +33,7 @@ census <-
           dplyr::transmute(STATEFP, STATE_NAME = NAME) %>%
           sf::st_drop_geometry()
       ) %>%
-      # The 2014 vintage only — the current one is already correct UTF-8 and
-      # re-encoding it would corrupt it.
+      # 2014 vintage only; the current one is already valid UTF-8.
       dplyr::mutate(
         dplyr::across(c(NAME, STATE_NAME), repair_latin1),
         VINTAGE = 2L
@@ -52,8 +46,7 @@ census <-
                    VINTAGE) %>%
   tibble::as_tibble() %>%
   dplyr::distinct() %>%
-  # Guarantee one name per FIPS key, preferring the current vintage, so the join
-  # stays many-to-one even if a future vintage introduces another spelling.
+  # One name per FIPS key, preferring the current vintage.
   dplyr::arrange(`FIPS State Code`, `FIPS County Code`, VINTAGE) %>%
   dplyr::distinct(`FIPS State Code`, `FIPS County Code`, .keep_all = TRUE) %>%
   dplyr::select(-VINTAGE)
@@ -255,9 +248,7 @@ fsa_lfp_eligibility <-
       `FIPS State Code` == "27" & `FSA County Code` == "112" ~ "111", # Otter Rail, MN
       `FIPS State Code` == "19" & `FSA County Code` == "156" ~ "155", # Pottawattamie, IA
       # FSA runs three offices over Aroostook County: Aroostook (23003), Houlton
-      # (23002), and Fort Kent (23004). Only the first shares its code with the
-      # county, so without these the other two carried FIPS county codes 002 and
-      # 004, which Maine does not use, and were dropped for having no Census county.
+      # (23002), and Fort Kent (23004). Only the first shares the county's code.
       `FIPS State Code` == "23" & `FSA County Code` == "002" ~ "003", # Houlton, ME
       `FIPS State Code` == "23" & `FSA County Code` == "004" ~ "003", # Fort Kent, ME
       `FIPS State Code` == "12" & `FSA County Code` == "025" ~ "086", # Dade, FL to Miami-Dade, FL
@@ -293,15 +284,9 @@ fsa_lfp_eligibility <-
                  `Disaster Type`
                  ) %>%
   # De-duplicate across the overlapping FOIA responses, keeping the most recently
-  # dated file's version of each determination.
-  #
-  # The key includes the FSA county, not just the FIPS county it falls in. FSA
-  # administers some counties as two offices and issues each its own eligibility
-  # determination, so keying on FIPS alone discarded one of every such pair: the
-  # west or south half of Pottawattamie IA, Nye NV, St. Louis MN, Polk MN, and
-  # Otter Tail MN, 72 determinations in total. They are not redundant — of the
-  # keys where both halves report, Pottawattamie disagrees on Payment Factor and
-  # Polk and St. Louis on the qualifying drought date.
+  # dated file's version of each determination. The key includes the FSA county:
+  # FSA administers some Census counties as two offices, each with its own
+  # determination, so a FIPS-only key drops one of every such pair.
   dplyr::distinct(
     `FSA State Code`,
     `FSA County Code`,
@@ -322,9 +307,8 @@ fsa_lfp_eligibility <-
   dplyr::left_join(
     census,
     by = c("FIPS State Code", "FIPS County Code"),
-    # "many-to-one" is an assertion, not a hint: dplyr errors if `census` ever
-    # carries more than one row per FIPS key, which is how duplicate records
-    # reach the archive unnoticed.
+    # many-to-one makes dplyr error if `census` ever carries more than one row per
+    # FIPS key.
     relationship = "many-to-one"
   ) %>%
   dplyr::select(
@@ -335,9 +319,8 @@ fsa_lfp_eligibility <-
     dplyr::everything()
   )
 
-# Records whose FIPS county is absent from the Census vintages above cannot be
-# placed and are dropped. Report them rather than dropping silently: a mapping gap
-# in the FSA-to-FIPS recoding shows up here and nowhere else.
+# Records whose FIPS county is absent from the Census vintages cannot be placed and
+# are dropped.
 unmapped <-
   fsa_lfp_eligibility %>%
   dplyr::filter(is.na(`FIPS County Name`)) %>%
@@ -355,21 +338,23 @@ if (nrow(unmapped) > 0L) {
 fsa_lfp_eligibility <-
   fsa_lfp_eligibility %>%
   dplyr::filter(!is.na(`FIPS County Name`)) %T>%
-  readr::write_excel_csv("fsa-lfp-eligibility.csv")
+  # Mirrored CSV and Parquet, identical records. CSV carries no types, so codes
+  # like "01" read back as 1; Parquet keeps them character and dates as dates.
+  readr::write_excel_csv("fsa-lfp-eligibility.csv") %T>%
+  arrow::write_parquet(sink = "fsa-lfp-eligibility.parquet",
+                       version = "latest",
+                       compression = "zstd",
+                       compression_level = 13,
+                       use_dictionary = TRUE)
 
 
 ## ---------------------------------------------------------------------------
 ## Cross-reference against FSA's own county definitions
 ##
-## Reported, never enforced. FSA issues LFP eligibility determinations at county
-## grain, while fsa-counties-dd17 and dd22 describe its *office* grain — so FSA
-## legitimately names counties those archives do not define. Puerto Rico is the
-## clearest case: the 2025-FSA-04690 response reports at municipio level (Aibonito,
-## Cayey, Cidra, …) where dd22 knows only the consolidated offices. FSA's codes also
-## evolve, so both vintages are read: 46113 (Shannon, SD) resolves only against
-## dd17 and 46102 (Oglala Lakota) only against dd22.
-##
-## A hard gate here would flag correct data as broken. The value is visibility.
+## Reported, never enforced. FSA determines eligibility at county grain while
+## fsa-counties-dd17 and dd22 describe office grain, so FSA names counties those
+## archives do not define. Both vintages are read because FSA's codes change:
+## 46113 (Shannon, SD) resolves only against dd17, 46102 only against dd22.
 ## ---------------------------------------------------------------------------
 
 fsa_counties <-
@@ -402,9 +387,8 @@ qa_unnamed_counties <-
   dplyr::count(`FSA State Code`, `FSA County Code`, `Program Year`,
                name = "records")
 
-# Puerto Rico is reported at two grains across the FOIA responses: municipio level
-# in 2025-FSA-04690, consolidated FSA offices in the later files. Anyone
-# aggregating Puerto Rico needs to know which years carry which.
+# Puerto Rico is reported at two grains: municipio level in 2025-FSA-04690,
+# consolidated FSA offices in the later files.
 qa_puerto_rico_grain <-
   fsa_lfp_eligibility %>%
   dplyr::filter(`FSA State Code` == "72") %>%
@@ -418,16 +402,14 @@ qa_puerto_rico_grain <-
                      values_fill = 0) %>%
   dplyr::arrange(`Program Year`)
 
-# Census counties FSA administers as more than one office. A consumer joining on
-# FIPS receives several rows for these, so quantify it rather than leaving them to
-# discover it.
+# Census counties FSA administers as more than one office; a join on FIPS returns
+# several rows for these.
 qa_split_counties <-
   fsa_lfp_eligibility %>%
   dplyr::summarise(
     `FSA Counties` = dplyr::n_distinct(`FSA State Code`, `FSA County Code`),
-    # Codes, not names: FSA spells the same code several ways across its files
-    # ("E POTTAWATTAMIE", "EAST POTTAWATTAMIE", "???"), so names would misrepresent
-    # how many distinct offices there are.
+    # Codes, not names: FSA spells the same code several ways ("E POTTAWATTAMIE",
+    # "EAST POTTAWATTAMIE", "???").
     `FSA Codes` = paste(sort(unique(paste0(`FSA State Code`, `FSA County Code`))),
                         collapse = " "),
     Records = dplyr::n(),
@@ -438,8 +420,8 @@ qa_split_counties <-
   dplyr::arrange(dplyr::desc(`FSA Counties`), `FIPS State Code`,
                  `FIPS County Code`)
 
-# Render a detail table as indented CSV. A tibble's own print wraps wide frames
-# across several blocks, which makes the report unreadable and ungreppable.
+# Detail tables as indented CSV; a tibble's print wraps wide frames across
+# several blocks.
 qa_detail <- function(x) {
   if (nrow(x) == 0L) {
     return(character(0))
@@ -509,6 +491,11 @@ s3_put(bucket = s3_bucket,
        content_type = "text/csv")
 
 s3_put(bucket = s3_bucket,
+       key = paste0(s3_prefix, "/fsa-lfp-eligibility.parquet"),
+       file = "fsa-lfp-eligibility.parquet",
+       content_type = "application/vnd.apache.parquet")
+
+s3_put(bucket = s3_bucket,
        key = paste0(s3_prefix, "/qa-report.txt"),
        file = "qa-report.txt",
        content_type = "text/plain")
@@ -529,6 +516,7 @@ s3_write_manifest(bucket = s3_bucket,
 cf_invalidate(
   paths = c(
     paste0("/", s3_prefix, "/fsa-lfp-eligibility.csv"),
+    paste0("/", s3_prefix, "/fsa-lfp-eligibility.parquet"),
     paste0("/", s3_prefix, "/qa-report.txt"),
     paste0("/", s3_prefix, "/_manifest.txt")
   )

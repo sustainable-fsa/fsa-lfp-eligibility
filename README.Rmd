@@ -22,6 +22,7 @@ The data in this repository were acquired via FOIA requests **2025-FSA-04690-F**
 - [`foia/2025-FSA-04690-F Bocinsky.zip`](./foia/2025-FSA-04690-F Bocinsky.zip) — 2008 through 2024 eligibility data (incomplete)
 - [`foia/2023-FSA-00937-F Bocinsky.zip`](./foia/2023-FSA-00937-F Bocinsky.zip) — previous FOIA data and correspondence (archived)
 - [`fsa-lfp-eligibility.csv`](https://data.sustainable-fsa.com/fsa-lfp-eligibility/fsa-lfp-eligibility.csv) — cleaned and consolidated data, one record per FSA county, program year, pasture type, and disaster type
+- [`fsa-lfp-eligibility.parquet`](https://data.sustainable-fsa.com/fsa-lfp-eligibility/fsa-lfp-eligibility.parquet) — the same records as Parquet
 - [`qa-report.txt`](https://data.sustainable-fsa.com/fsa-lfp-eligibility/qa-report.txt) — QA summary and flagged records for the published data
 - [`fsa-lfp-eligibility.R`](./fsa-lfp-eligibility.R) — processing script
 - [`fsa-lfp-eligibility.qmd`](./fsa-lfp-eligibility.qmd) — Quarto dashboard source
@@ -30,7 +31,7 @@ The data in this repository were acquired via FOIA requests **2025-FSA-04690-F**
 
 ## ☁️ Archive Hosting & Automated Publishing
 
-The consolidated data (`fsa-lfp-eligibility.csv`), the QA report (`qa-report.txt`), the `assets/` directory the dashboard reads from, and the `foia/` correspondence are all mirrored to S3, served via CloudFront at <https://data.sustainable-fsa.com/fsa-lfp-eligibility/> (browse the [archive listing](https://data.sustainable-fsa.com/fsa-lfp-eligibility/) or [`_manifest.txt`](https://data.sustainable-fsa.com/fsa-lfp-eligibility/_manifest.txt) for a flat index). The interactive dashboard itself is served separately, via GitHub Pages at <https://sustainable-fsa.com/fsa-lfp-eligibility/>.
+The consolidated data (`fsa-lfp-eligibility.csv` and `fsa-lfp-eligibility.parquet`), the QA report (`qa-report.txt`), the `assets/` directory the dashboard reads from, and the `foia/` correspondence are all mirrored to S3, served via CloudFront at <https://data.sustainable-fsa.com/fsa-lfp-eligibility/> (browse the [archive listing](https://data.sustainable-fsa.com/fsa-lfp-eligibility/) or [`_manifest.txt`](https://data.sustainable-fsa.com/fsa-lfp-eligibility/_manifest.txt) for a flat index). The interactive dashboard itself is served separately, via GitHub Pages at <https://sustainable-fsa.com/fsa-lfp-eligibility/>.
 
 Publishing is handled by [`fsa-lfp-eligibility.R`](fsa-lfp-eligibility.R) via the shared [`R/s3-archive.R`](R/s3-archive.R) helpers, and runs automatically in GitHub Actions ([`.github/workflows/fsa-lfp-eligibility.yaml`](.github/workflows/fsa-lfp-eligibility.yaml)) whenever the script, dashboard, or workflow changes, or on manual dispatch. The workflow authenticates to AWS via GitHub OIDC (no long-lived credentials stored in the repo), re-renders the README and dashboard, and commits them back to git only if the rendered output changed.
 
@@ -44,9 +45,11 @@ Column names and data can vary subtly by year. The processing workflow in [`fsa-
 
 ---
 
-## 📤 Output Data: Cleaned CSV
+## 📤 Output Data: Cleaned CSV and Parquet
 
-The file [`fsa-lfp-eligibility.csv`](https://data.sustainable-fsa.com/fsa-lfp-eligibility/fsa-lfp-eligibility.csv) is a tidy dataset for analysis and visualization.
+The archive is published in both formats with identical records — [`fsa-lfp-eligibility.csv`](https://data.sustainable-fsa.com/fsa-lfp-eligibility/fsa-lfp-eligibility.csv) and [`fsa-lfp-eligibility.parquet`](https://data.sustainable-fsa.com/fsa-lfp-eligibility/fsa-lfp-eligibility.parquet).
+
+The Parquet carries column types. In the CSV the zero-padded FSA and FIPS codes `01` and `001` must be read as character or they become `1`, and `D3A END` and `D4A END` are entirely empty, so a CSV reader takes them for logical rather than date columns.
 
 Each record is one eligibility determination, uniquely identified by
 `FSA State Code`, `FSA County Code`, `Program Year`, `Pasture Type`, and
@@ -55,11 +58,11 @@ Each record is one eligibility determination, uniquely identified by
 **The key is the FSA county, not the Census county.** FSA administers seven Census
 counties as two or three separate offices and determines eligibility for each
 independently, so those counties carry several records per program year and pasture
-type — Pottawattamie IA, Nye NV, St. Louis MN, Polk MN, Otter Tail MN, Aroostook ME,
-and Oglala Lakota SD. The determinations genuinely differ: for the keys where both
-halves of a split county report, Pottawattamie disagrees on `Payment Factor` and
-Polk and St. Louis on the qualifying drought date. Anything aggregating by FIPS
-county must decide how to combine them rather than assuming one row per county.
+type: Pottawattamie IA, Nye NV, St. Louis MN, Polk MN, Otter Tail MN, Aroostook ME,
+and Oglala Lakota SD. The determinations differ — where both halves of a split
+county report the same key, Pottawattamie differs on `Payment Factor`, and Polk and
+St. Louis on the qualifying drought date. Aggregating by Census county means
+choosing how to combine them.
 
 ### Variables in Output
 

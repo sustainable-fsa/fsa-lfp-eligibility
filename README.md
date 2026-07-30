@@ -29,6 +29,8 @@ workbooks, are archived in the [`foia`](./foia) directory.
 - [`fsa-lfp-eligibility.csv`](https://data.sustainable-fsa.com/fsa-lfp-eligibility/fsa-lfp-eligibility.csv)
   — cleaned and consolidated data, one record per FSA county, program
   year, pasture type, and disaster type
+- [`fsa-lfp-eligibility.parquet`](https://data.sustainable-fsa.com/fsa-lfp-eligibility/fsa-lfp-eligibility.parquet)
+  — the same records as Parquet
 - [`qa-report.txt`](https://data.sustainable-fsa.com/fsa-lfp-eligibility/qa-report.txt)
   — QA summary and flagged records for the published data
 - [`fsa-lfp-eligibility.R`](./fsa-lfp-eligibility.R) — processing script
@@ -41,10 +43,11 @@ workbooks, are archived in the [`foia`](./foia) directory.
 
 ## ☁️ Archive Hosting & Automated Publishing
 
-The consolidated data (`fsa-lfp-eligibility.csv`), the QA report
-(`qa-report.txt`), the `assets/` directory the dashboard reads from, and
-the `foia/` correspondence are all mirrored to S3, served via CloudFront
-at <https://data.sustainable-fsa.com/fsa-lfp-eligibility/> (browse the
+The consolidated data (`fsa-lfp-eligibility.csv` and
+`fsa-lfp-eligibility.parquet`), the QA report (`qa-report.txt`), the
+`assets/` directory the dashboard reads from, and the `foia/`
+correspondence are all mirrored to S3, served via CloudFront at
+<https://data.sustainable-fsa.com/fsa-lfp-eligibility/> (browse the
 [archive listing](https://data.sustainable-fsa.com/fsa-lfp-eligibility/)
 or
 [`_manifest.txt`](https://data.sustainable-fsa.com/fsa-lfp-eligibility/_manifest.txt)
@@ -80,11 +83,17 @@ FOIA.
 
 ------------------------------------------------------------------------
 
-## 📤 Output Data: Cleaned CSV
+## 📤 Output Data: Cleaned CSV and Parquet
 
-The file
+The archive is published in both formats with identical records —
 [`fsa-lfp-eligibility.csv`](https://data.sustainable-fsa.com/fsa-lfp-eligibility/fsa-lfp-eligibility.csv)
-is a tidy dataset for analysis and visualization.
+and
+[`fsa-lfp-eligibility.parquet`](https://data.sustainable-fsa.com/fsa-lfp-eligibility/fsa-lfp-eligibility.parquet).
+
+The Parquet carries column types. In the CSV the zero-padded FSA and
+FIPS codes `01` and `001` must be read as character or they become `1`,
+and `D3A END` and `D4A END` are entirely empty, so a CSV reader takes
+them for logical rather than date columns.
 
 Each record is one eligibility determination, uniquely identified by
 `FSA State Code`, `FSA County Code`, `Program Year`, `Pasture Type`, and
@@ -93,13 +102,12 @@ Each record is one eligibility determination, uniquely identified by
 **The key is the FSA county, not the Census county.** FSA administers
 seven Census counties as two or three separate offices and determines
 eligibility for each independently, so those counties carry several
-records per program year and pasture type — Pottawattamie IA, Nye NV,
+records per program year and pasture type: Pottawattamie IA, Nye NV,
 St. Louis MN, Polk MN, Otter Tail MN, Aroostook ME, and Oglala Lakota
-SD. The determinations genuinely differ: for the keys where both halves
-of a split county report, Pottawattamie disagrees on `Payment Factor`
-and Polk and St. Louis on the qualifying drought date. Anything
-aggregating by FIPS county must decide how to combine them rather than
-assuming one row per county.
+SD. The determinations differ — where both halves of a split county
+report the same key, Pottawattamie differs on `Payment Factor`, and Polk
+and St. Louis on the qualifying drought date. Aggregating by Census
+county means choosing how to combine them.
 
 ### Variables in Output
 

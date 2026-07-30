@@ -29,19 +29,9 @@ dir.create("assets",
            recursive = TRUE,
            showWarnings = FALSE)
 
-## Keyed on the FSA county, matching both the archive and the boundary geometry the
-## map draws. The geometry is keyed on FSA codes, so keying the data on FIPS was a
-## mismatch. Fourteen FSA counties here carry a code that differs from the FIPS code
-## of the county they fall in, and under FIPS keying seven of them painted a
-## neighbouring FSA county's polygon — Southeast Nye's determination coloured
-## Northwest Nye, West Pottawattamie's coloured East Pottawattamie, and Houlton's
-## and Fort Kent's coloured Aroostook — while the other seven did not render at all.
-## Silent misattribution, not a visible gap.
-##
-## No reduction is needed at this grain. FSA administers seven Census counties as
-## two or three offices and determines eligibility for each separately; keyed on the
-## FSA county each is its own polygon, so the halves draw side by side rather than
-## one of them being dropped.
+## Keyed on the FSA county, matching the archive and the FSA-keyed boundary
+## geometry. No reduction is needed at this grain: where FSA administers a Census
+## county as two or three offices, each is its own polygon.
 readr::read_csv("fsa-lfp-eligibility.csv") %>%
   dplyr::transmute(
     id = paste0(`FSA State Code`, `FSA County Code`),
@@ -104,17 +94,12 @@ formatDate = d3.utcFormat("%b %d, %Y")  // e.g., "Apr 18, 2025"
 
 // counties
 
-// FSA county geometry, from the fsa-counties-dd22 archive. Its polygons are keyed
-// on the 5-character FSA county code, which is what the data extract now uses —
-// previously the extract was keyed on FIPS, so the 150 FSA counties whose code
-// differs from their county's FIPS code never joined and never rendered.
+// FSA county geometry from the fsa-counties-dd22 archive, keyed on the 5-character
+// FSA county code.
 //
-// dd22 rather than dd17, and rather than switching by program year as the normal
-// grazing period dashboard does. Measured across all 18 program years, dd22
-// resolves at least as many FSA codes as dd17 in every one and one more in six of
-// them, and it alone defines 16079 (Shoshone, ID). Only five records of 51,348 —
-// 31045 and 31165 in 2008, 51087 in 2010 — name themselves the way dd17 draws
-// them, which does not earn a second fetch and a year-dependent branch.
+// dd22 rather than dd17: it resolves at least as many FSA codes as dd17 in every
+// program year, and alone defines 16079 (Shoshone, ID). Five records of 51,348
+// match dd17's boundaries instead — 31045 and 31165 in 2008, 51087 in 2010.
 us = await d3.json("https://data.sustainable-fsa.com/fsa-counties-dd22/fsa-counties-dd22.topojson");
 counties = topojson.feature(us, us.objects.counties)
 
