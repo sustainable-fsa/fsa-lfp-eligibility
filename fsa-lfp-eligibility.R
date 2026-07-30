@@ -431,7 +431,6 @@ qa_detail <- function(x) {
 
 qa_report <- c(
   "FSA LFP Eligibility archive — QA report",
-  paste0("Generated: ", format(Sys.time(), "%Y-%m-%d %H:%M:%S %Z")),
   "",
   "Grain: one record per FSA county, program year, pasture type, and disaster",
   "type. FSA administers some Census counties as several offices and determines",
