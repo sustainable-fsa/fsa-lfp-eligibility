@@ -1,5 +1,4 @@
 FSA LFP Eligibility archive — QA report
-Generated: 2026-07-30 03:36:53 UTC
 
 Grain: one record per FSA county, program year, pasture type, and disaster
 type. FSA administers some Census counties as several offices and determines
