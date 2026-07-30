@@ -219,6 +219,31 @@ later years. The split does assume `Payment Factor` is uncapped for the
 era; the cap cannot be recomputed to check, since the inputs to it are
 absent, but no record shows it binding.
 
+**`Qualifying Date` is only available for some of these events.** The
+single date FSA reports for the era, `Date of Qualifying Drought`, is
+what its name says: the day the qualifying drought began. Checked
+against the [web-harvest
+archive](https://sustainable-fsa.com/fsa-lfp-eligibility-web/), which
+*does* carry the 2008–2011 tier dates, it equals a tier START on 5,893
+of 6,613 shared records and a tier END on none.
+
+For the “at any time” tiers that is exactly the satisfaction date —
+`D3a` and `D4a` are satisfied the day the drought reaches that class —
+so those events carry it. For the duration tiers it is not: `D2`
+requires eight consecutive weeks and `D3b` four, so the requirement is
+met 55 or more days later. Rather than put a start date in a column that
+means *the date the tier was satisfied* everywhere else, those events
+carry `NA`:
+
+| Era-1 tier | Events | Dated | `Qualifying Date` |
+|----|----|----|----|
+| `D3a`, `D4a` | 4,104 | 3,899 | reported — the start *is* the satisfaction date; 205 had no date at all |
+| `D2`, `D3b` | 2,634 | 0 | `NA` — not recoverable from this response |
+
+The web-harvest archive reports these tier dates directly, from the
+fy-2009-2011 workbook the FOIA response omitted them from. **Prefer it
+for program years before 2012.**
+
 ### Program year 2026 onward
 
 The rules change again. D2 splits in two — four consecutive weeks earns
@@ -268,8 +293,11 @@ payable-months comparison needs no join back to the wide file.
 The events file does not round-trip. 514 determinations yield no event:
 222 fire determinations, which carry no drought tier by definition, and
 292 drought determinations from the 2025-FSA-04690 response, which
-reports eligibility without tier dates. A further 718 events, all in
-2011, have a known tier and no reported date.
+reports eligibility without tier dates. A further 2,839 events, all in
+2008–2011, have a known tier and no qualifying date — 718 because FSA
+reported none at all, and 2,121 because the date it reported is the
+drought’s start rather than the tier’s satisfaction date (see *Program
+years 2008–2011* above).
 [`qa-report.txt`](https://data.sustainable-fsa.com/fsa-lfp-eligibility/qa-report.txt)
 breaks all of these out by program year.
 

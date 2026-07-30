@@ -440,9 +440,23 @@ events_note <-
           `Payment Factor` == 3L ~ "D3b",
         `Note (FOIA 2025-FSA-04690-F Bocinsky)` == "D4" ~ "D4a"
       ),
-    # The only date reported for this era. 718 of 6,738 events have none; the tier
-    # is known, the date was never published.
-    `Qualifying Date` = `Date of Qualifying Drought`
+    # `Date of Qualifying Drought` is the only date reported for this era, and it
+    # is what its name says: when the qualifying drought began. Checked against
+    # the sustainable-fsa/fsa-lfp-eligibility-web archive, which does carry the
+    # 2008-2011 tier dates, it equals a tier START on 5,893 of 6,613 shared
+    # records and a tier END on none.
+    #
+    # For the "at any time" tiers that is exactly the satisfaction date -- D3A and
+    # D4A are satisfied the day the drought reaches that class. For the duration
+    # tiers it is not: D2 needs eight consecutive weeks and D3B four, so the
+    # requirement is met 55-plus days later. Rather than record a start date in a
+    # column that means "the date the tier was satisfied" everywhere else, leave it
+    # unknown and say so. The web archive reports these directly; prefer it before
+    # 2012.
+    `Qualifying Date` =
+      dplyr::if_else(`Qualifying Drought Event` %in% c("D3a", "D4a"),
+                     `Date of Qualifying Drought`,
+                     as.Date(NA))
   ) %>%
   dplyr::select(
     `FIPS State Code`, `FIPS County Code`, `FSA State Code`, `FSA County Code`,
@@ -699,10 +713,14 @@ qa_report <- c(
   "  already cover, so the events file reads the columns and ignores the note.",
   qa_detail(qa_no_event),
   "",
-  paste0("Events with no reported date: ", sum(qa_undated_events$events)),
-  "  Kept, not dropped: the tier is known and the date is not. Program years",
-  "  2008-2011 carry no tier date columns at all, so `Date of Qualifying Drought` is",
-  "  the only date available and it is blank on these.",
+  paste0("Events with no qualifying date: ", sum(qa_undated_events$events)),
+  "  Kept, not dropped: the tier is known and the date is not. All are 2008-2011,",
+  "  which carries no tier date columns -- only `Date of Qualifying Drought`, the",
+  "  day the drought began. That is the satisfaction date for the at-any-time tiers",
+  "  (D3a, D4a) and is used for them; for the duration tiers (D2 eight consecutive",
+  "  weeks, D3b four) the requirement is met 55-plus days later, so no satisfaction",
+  "  date can be recovered and none is asserted. The fsa-lfp-eligibility-web archive",
+  "  reports these directly -- prefer it before 2012.",
   qa_detail(qa_undated_events),
   "",
   paste0("Program years whose event drought factors are wholly derived: ",

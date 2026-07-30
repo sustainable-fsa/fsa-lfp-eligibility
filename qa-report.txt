@@ -54,14 +54,21 @@ Determinations yielding no event: 514
   2024,Drought,18
   2024,Fire,29
 
-Events with no reported date: 718
-  Kept, not dropped: the tier is known and the date is not. Program years
-  2008-2011 carry no tier date columns at all, so `Date of Qualifying Drought` is
-  the only date available and it is blank on these.
+Events with no qualifying date: 2839
+  Kept, not dropped: the tier is known and the date is not. All are 2008-2011,
+  which carries no tier date columns -- only `Date of Qualifying Drought`, the
+  day the drought began. That is the satisfaction date for the at-any-time tiers
+  (D3a, D4a) and is used for them; for the duration tiers (D2 eight consecutive
+  weeks, D3b four) the requirement is met 55-plus days later, so no satisfaction
+  date can be recovered and none is asserted. The fsa-lfp-eligibility-web archive
+  reports these directly -- prefer it before 2012.
   Program Year,Qualifying Drought Event,events
-  2011,D2,246
+  2008,D2,465
+  2009,D2,322
+  2010,D2,271
+  2011,D2,1182
   2011,D3a,34
-  2011,D3b,267
+  2011,D3b,394
   2011,D4a,171
 
 Program years whose event drought factors are wholly derived: 7
