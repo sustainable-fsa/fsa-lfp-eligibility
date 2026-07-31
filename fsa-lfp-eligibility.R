@@ -245,7 +245,7 @@ fsa_lfp_eligibility <-
       `FIPS State Code` == "29" & `FSA County Code` == "193" ~ "186", # Ste. Genevieve, Missouri
       `FIPS State Code` == "27" & `FSA County Code` == "138" ~ "137", # St. Louis, MN
       `FIPS State Code` == "27" & `FSA County Code` == "120" ~ "119", # Polk, MN
-      `FIPS State Code` == "27" & `FSA County Code` == "112" ~ "111", # Otter Rail, MN
+      `FIPS State Code` == "27" & `FSA County Code` == "112" ~ "111", # Otter Tail, MN
       `FIPS State Code` == "19" & `FSA County Code` == "156" ~ "155", # Pottawattamie, IA
       # FSA runs three offices over Aroostook County: Aroostook (23003), Houlton
       # (23002), and Fort Kent (23004). Only the first shares the county's code.
@@ -351,42 +351,19 @@ fsa_lfp_eligibility <-
 ## ---------------------------------------------------------------------------
 ## Event grain
 ##
-## The archive above is wide: one record per determination, carrying a column pair
-## per drought tier. fsa-lfp-eligibility-reanalysis publishes the same information
-## long — one row per qualifying drought event — so comparing the two means
-## reshaping this one. This section publishes the reshape rather than leaving every
-## consumer to rediscover it.
-##
-## Which date qualifies a tier is not uniform. D2, D3B and D4B are multi-week
-## tiers and their END is the day the requirement is met; D3A and D4A trigger "at
-## any time", have no END column at all (0 non-NA of 36,041 and 14,053), and are
-## satisfied on their START. FSA's own `Date of Qualifying Drought` is the earliest
-## of exactly those five dates in 22,222 of 22,222 records, which is what
-## establishes the mapping.
-##
-## Do not pivot on the START columns: `D3B START DATE` is a copy of
-## `D3A START DATE` in all 24,054 rows carrying both, and `D4B START DATE` of
-## `D4A START DATE` in all 10,431, so a START-keyed pivot double-counts D3 and D4.
-##
-## Program years 2008-2011 came from a different FOIA response and carry no tier
-## columns, no grazing dates and no `Maximum Eligible Payment Months`. Their tier
-## survives only in `Note`, which does not distinguish the A and B sub-tiers — but
-## `Payment Factor` does, because the 2008 Farm Bill ladder pays 2 for D3 "at any
-## time" and 3 for D3 "for at least 4 weeks". There is no D4b tier in that era; the
-## 5-payment D4-for-4-weeks tier arrives with the 2014 Farm Bill.
+## The archive above is wide: one record per determination, a column pair per
+## drought tier. This section reshapes it long, one row per qualifying drought
+## event, matching the fsa-lfp-eligibility-web and fsa-lfp-eligibility-reanalysis
+## projections. See README for the tier-date convention and the ladders.
 ## ---------------------------------------------------------------------------
 
-# The tier each event belongs to, and the date that satisfied it.
+# The tier each event belongs to, and the date that satisfied it. Duration tiers
+# are satisfied on their END; the "at any time" tiers D3A and D4A carry no END and
+# are satisfied on their START.
 #
-# Program year 2026 splits D2 in two — four consecutive weeks earns one payment,
-# seven earns two — so a 2026 file needs a D2A/D2B pair where earlier years carry a
-# single D2. Both are duration tiers, unlike the D3A/D3B and D4A/D4B pairs where
-# only the B half is, so both are satisfied on their END.
-#
-# FSA has published no 2026 file yet, so those two column names are a projection of
-# its own D3A/D3B naming rather than something observed. `any_of()` below reads them
-# only once they appear, and `assert_empty()` refuses to publish if a 2026 file
-# arrives shaped differently — an unrecognised tier must stop the run, not vanish.
+# D2A/D2B are the split D2 tiers in force from program year 2026, named as FSA
+# names them in the weekly workbooks archived in fsa-lfp-eligibility-web. No FOIA
+# response covers 2026 yet, so `any_of()` reads them once they appear.
 event_dates <- c(
   D2       = "D2 END",
   D2a_2026 = "D2A END",
@@ -397,10 +374,9 @@ event_dates <- c(
   D4b      = "D4B END"
 )
 
-# Tier columns the events file deliberately does not read: the START of a duration
-# tier, whose END is the satisfaction date, and the empty END of an "at any time"
-# tier. Listed so the assertion below can tell a column we ignore on purpose from
-# one FSA has newly introduced.
+# Tier columns not read: the START of a duration tier and the empty END of an
+# "at any time" tier. Listed so the assertion below can distinguish these from a
+# column FSA has newly introduced.
 event_dates_unused <- c(
   "D2 START DATE", "D2A START DATE", "D2B START DATE",
   "D3A END", "D3B START DATE",
@@ -441,18 +417,9 @@ events_note <-
         `Note (FOIA 2025-FSA-04690-F Bocinsky)` == "D4" ~ "D4a"
       ),
     # `Date of Qualifying Drought` is the only date reported for this era, and it
-    # is what its name says: when the qualifying drought began. Checked against
-    # the sustainable-fsa/fsa-lfp-eligibility-web archive, which does carry the
-    # 2008-2011 tier dates, it equals a tier START on 5,893 of 6,613 shared
-    # records and a tier END on none.
-    #
-    # For the "at any time" tiers that is exactly the satisfaction date -- D3A and
-    # D4A are satisfied the day the drought reaches that class. For the duration
-    # tiers it is not: D2 needs eight consecutive weeks and D3B four, so the
-    # requirement is met 55-plus days later. Rather than record a start date in a
-    # column that means "the date the tier was satisfied" everywhere else, leave it
-    # unknown and say so. The web archive reports these directly; prefer it before
-    # 2012.
+    # records when the drought began, not when a tier was satisfied. For D3a and
+    # D4a those coincide. For the duration tiers they do not, and no satisfaction
+    # date is recoverable, so none is asserted. See README.
     `Qualifying Date` =
       dplyr::if_else(`Qualifying Drought Event` %in% c("D3a", "D4a"),
                      `Date of Qualifying Drought`,
@@ -474,16 +441,11 @@ fsa_lfp_eligibility_events <-
     `Pasture Type`,
     `Qualifying Drought Event`,
     `Qualifying Date`,
-    # Derived from the ladder in force, not copied from FSA's record-level
-    # `Drought Factor`: that column names the tier that set the award, so copying
-    # it onto every event would overstate the lower ones. The derivation
-    # reproduces it on all 29,893 records where FSA states it, and fills program
-    # years 2022-2024, where FSA left it blank on all 14,203 tier-bearing records.
-    # No `.default`: an event the ladder does not recognise is a defect, not a
-    # non-qualifying event to drop, so it becomes NA here and the assertion below
-    # stops the run. The eras are bounded at both ends for the same reason — an
-    # open-ended `>= 2012` would quietly price a 2026 D2 on the 2014 Farm Bill
-    # ladder instead of failing.
+    # Monthly payments the tier earns under the ladder in force, derived rather
+    # than copied from FSA's record-level `Drought Factor`, which names only the
+    # tier that set the award. Unrecognised events become NA and the assertion
+    # below stops the run; eras are bounded at both ends so a later rule change
+    # cannot be priced on an earlier ladder.
     `Drought Factor` =
       dplyr::case_when(
         # 2008 Farm Bill
@@ -492,15 +454,15 @@ fsa_lfp_eligibility_events <-
         `Program Year` <= 2011L & `Qualifying Drought Event` %in%
           c("D3b", "D4a", "D4b") ~ 3L,
 
-        # 2014 Farm Bill, from Program Year 2012: the ceiling rises from 3 to 5
+        # 2014 Farm Bill, from Program Year 2012
         `Program Year` %in% 2012:2025 & `Qualifying Drought Event` == "D2"  ~ 1L,
         `Program Year` %in% 2012:2025 & `Qualifying Drought Event` == "D3a" ~ 3L,
         `Program Year` %in% 2012:2025 & `Qualifying Drought Event` %in%
           c("D3b", "D4a") ~ 4L,
         `Program Year` %in% 2012:2025 & `Qualifying Drought Event` == "D4b" ~ 5L,
 
-        # From Program Year 2026: D2 splits at four and seven consecutive weeks,
-        # reinstating a 2-payment tier. D3 and D4 are unchanged.
+        # P.L. 119-21, from Program Year 2026: D2 splits into a 4-consecutive-week
+        # tier and a 7-of-8-consecutive-week tier
         `Program Year` >= 2026L & `Qualifying Drought Event` == "D2a_2026" ~ 1L,
         `Program Year` >= 2026L & `Qualifying Drought Event` == "D2b_2026" ~ 2L,
         `Program Year` >= 2026L & `Qualifying Drought Event` == "D3a"      ~ 3L,
@@ -527,10 +489,8 @@ assert_empty <- function(offenders, what) {
        call. = FALSE)
 }
 
-# Both assertions exist to make the 2026 rule change impossible to publish through
-# by accident. Unlike the qa_* tables below, which report what FSA reported, an
-# unscored event or an unrecognised tier column means this script no longer
-# describes the program, so the run stops before anything is written.
+# Enforced, not reported: an unscored event or an unrecognised tier column means
+# the script no longer describes the program.
 
 assert_empty(
   fsa_lfp_eligibility_events %>%
@@ -637,10 +597,8 @@ qa_split_counties <-
   dplyr::arrange(dplyr::desc(`FSA Counties`), `FIPS State Code`,
                  `FIPS County Code`)
 
-# Determinations that yield no event. The predicate is the complement of the two
-# event paths above, era by era, so it cannot drift from them: a 2012-onward
-# determination yields an event for each populated tier column, and a 2008-2011 one
-# for its `Note` tier.
+# Determinations that yield no event: the complement of the two event paths
+# above, era by era.
 qa_no_event <-
   fsa_lfp_eligibility %>%
   dplyr::filter(
@@ -708,36 +666,31 @@ qa_report <- c(
   paste0("Determinations yielding no event: ", sum(qa_no_event$records)),
   "  A determination with no qualifying drought tier has nothing to reshape. Fire",
   "  determinations never carry one. The rest are drought determinations from the",
-  "  2025-FSA-04690 response, which reports eligibility without the tier dates. 157",
-  "  of those do name a tier in `Note`, but only for program years the tier columns",
-  "  already cover, so the events file reads the columns and ignores the note.",
+  "  2025-FSA-04690 response, which reports eligibility without the tier dates.",
+  "  Where such a record names a tier in `Note` for a program year the tier columns",
+  "  already cover, the columns are read and the note ignored.",
   qa_detail(qa_no_event),
   "",
   paste0("Events with no qualifying date: ", sum(qa_undated_events$events)),
-  "  Kept, not dropped: the tier is known and the date is not. All are 2008-2011,",
-  "  which carries no tier date columns -- only `Date of Qualifying Drought`, the",
-  "  day the drought began. That is the satisfaction date for the at-any-time tiers",
-  "  (D3a, D4a) and is used for them; for the duration tiers (D2 eight consecutive",
-  "  weeks, D3b four) the requirement is met 55-plus days later, so no satisfaction",
-  "  date can be recovered and none is asserted. The fsa-lfp-eligibility-web archive",
-  "  reports these directly -- prefer it before 2012.",
+  "  The tier is known and the date is not. All are 2008-2011, which carries no",
+  "  tier date columns -- only `Date of Qualifying Drought`, the day the drought",
+  "  began. For D3a and D4a that is the satisfaction date and is used. For the",
+  "  duration tiers it is not, and none is recoverable, so none is asserted.",
+  "  fsa-lfp-eligibility-web reports these directly; prefer it before 2012.",
   qa_detail(qa_undated_events),
   "",
   paste0("Program years whose event drought factors are wholly derived: ",
          nrow(qa_derived_factor)),
   "  FSA states `Drought Factor` on no record in these years, so the events file",
-  "  derives every one from the tier and the ladder in force. The derivation",
-  "  reproduces FSA's own value on all 29,893 records where FSA does state it, and",
-  "  `Payment Factor` equals min(drought factor, Maximum Eligible Payment Months) on",
-  "  all 44,096 records carrying both, so the ladder is not in doubt.",
+  "  derives every one from the tier and the ladder in force. Where FSA does state",
+  "  it, the derivation reproduces it exactly.",
   qa_detail(qa_derived_factor),
   "",
   "The 2008-2011 A/B sub-tier split assumes `Payment Factor` is uncapped:",
-  "  Those years carry no tier columns, so the events file reads the tier from",
-  "  `Note` and splits D3 on `Payment Factor` — 2 for D3 at any time, 3 for D3 over",
-  "  at least 4 weeks. `Maximum Eligible Payment Months` and both grazing dates are",
-  "  absent for the era, so the cap cannot be recomputed to check. No record shows",
-  "  it binding: D2 is always 1, D4 always 3, and D3 is never 1.",
+  "  Those years carry no tier columns, so the tier comes from `Note` and D3 is",
+  "  split on `Payment Factor` -- 2 for D3 at any time, 3 for D3 over at least four",
+  "  weeks. The cap's inputs are absent for the era, so it cannot be recomputed to",
+  "  check; no record shows it binding.",
   "",
   paste0("FSA counties not defined in fsa-counties-dd17/dd22: ",
          nrow(qa_unknown_to_fsa_counties), " (",
