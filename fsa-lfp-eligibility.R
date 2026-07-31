@@ -353,7 +353,7 @@ fsa_lfp_eligibility <-
 ##
 ## The archive above is wide: one record per determination, a column pair per
 ## drought tier. This section reshapes it long, one row per qualifying drought
-## event, matching the fsa-lfp-eligibility-web and fsa-lfp-eligibility-reanalysis
+## event, matching the fsa-lfp-eligibility-web and fsa-lfp-eligibility-derived
 ## projections. See README for the tier-date convention and the ladders.
 ## ---------------------------------------------------------------------------
 
@@ -658,7 +658,7 @@ qa_report <- c(
   paste0("Events published: ", nrow(fsa_lfp_eligibility_events)),
   "  fsa-lfp-eligibility-events.csv holds the same determinations at event grain —",
   "  one row per qualifying drought tier, matching the shape of the",
-  "  fsa-lfp-eligibility-reanalysis archive. It does not round-trip to the record",
+  "  fsa-lfp-eligibility-derived archive. It does not round-trip to the record",
   "  count above; the reconciliation is the two tables below.",
   "",
   "Everything below is reported, not enforced.",

@@ -303,7 +303,7 @@ crosswalk is published in
 
 ------------------------------------------------------------------------
 
-### Comparing against the reanalysis
+### Comparing against the derived archive
 
 ``` r
 official <-
@@ -312,27 +312,27 @@ official <-
   ) |>
   dplyr::mutate(source = "fsa-published")
 
-reanalysis <-
+derived <-
   arrow::read_parquet(
-    "https://data.sustainable-fsa.com/fsa-lfp-eligibility-reanalysis/fsa-lfp-eligibility-reanalysis.parquet"
+    "https://data.sustainable-fsa.com/fsa-lfp-eligibility-derived/fsa-lfp-eligibility-derived.parquet"
   ) |>
   dplyr::mutate(dplyr::across(c(source, `Pasture Type`,
                                 `Qualifying Drought Event`), as.character))
 
-dplyr::bind_rows(official, reanalysis)
+dplyr::bind_rows(official, derived)
 ```
 
-The reanalysis stores `source`, `Pasture Type` and
+The derived archive stores `source`, `Pasture Type` and
 `Qualifying Drought Event` as factors; this archive uses character
 throughout. `bind_rows()` reconciles that on its own, and the
 `as.character()` above only keeps the levels from surprising you
 downstream.
 
-Two schema differences to expect. The reanalysis carries `source`,
+Two schema differences to expect. The derived archive carries `source`,
 naming which of four county aggregations produced the record, where FSA
 has one determination. And it carries neither
 `Maximum Eligible Payment Months` nor `Payment Factor`, so those come
-back `NA` for the reanalysis rows.
+back `NA` for the derived rows.
 
 ------------------------------------------------------------------------
 
@@ -455,15 +455,15 @@ with the same event codes, so they can be compared directly:
 - [fsa-lfp-eligibility-web](https://sustainable-fsa.com/fsa-lfp-eligibility-web/)
   — FSA’s determinations as published weekly on its maps page,
   2008–present, including every superseded weekly version
-- [fsa-lfp-eligibility-reanalysis](https://data.sustainable-fsa.com/fsa-lfp-eligibility-reanalysis/)
+- [fsa-lfp-eligibility-derived](https://data.sustainable-fsa.com/fsa-lfp-eligibility-derived/)
   — eligibility recomputed from the US Drought Monitor under four county
   aggregations
 
 The FOIA archive is the richer record for closed program years: it
 includes fire eligibility and payment factors the web tables omit. The
 web archive covers the current program year and, for 2008–2011, carries
-per-tier dates the FOIA response omitted. The reanalysis is not a record
-of FSA’s determinations.
+per-tier dates the FOIA response omitted. The derived archive is not a
+record of FSA’s determinations.
 
 ------------------------------------------------------------------------
 

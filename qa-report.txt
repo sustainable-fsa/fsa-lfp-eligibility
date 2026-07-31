@@ -12,7 +12,7 @@ Program years: 2008-2025
 Events published: 105719
   fsa-lfp-eligibility-events.csv holds the same determinations at event grain —
   one row per qualifying drought tier, matching the shape of the
-  fsa-lfp-eligibility-reanalysis archive. It does not round-trip to the record
+  fsa-lfp-eligibility-derived archive. It does not round-trip to the record
   count above; the reconciliation is the two tables below.
 
 Everything below is reported, not enforced.
