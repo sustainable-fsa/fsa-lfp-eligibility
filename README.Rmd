@@ -25,6 +25,7 @@ The data in this repository were acquired via FOIA requests **2025-FSA-04690-F**
 - [`fsa-lfp-eligibility.parquet`](https://data.sustainable-fsa.com/fsa-lfp-eligibility/fsa-lfp-eligibility.parquet) — the same records as Parquet
 - [`fsa-lfp-eligibility-events.csv`](https://data.sustainable-fsa.com/fsa-lfp-eligibility/fsa-lfp-eligibility-events.csv) — the same determinations reshaped long, one record per qualifying drought event
 - [`fsa-lfp-eligibility-events.parquet`](https://data.sustainable-fsa.com/fsa-lfp-eligibility/fsa-lfp-eligibility-events.parquet) — the same event records as Parquet
+- [`fsa-lfp-eligibility-events.json`](https://data.sustainable-fsa.com/fsa-lfp-eligibility/fsa-lfp-eligibility-events.json) — the same event records restructured for browsers (see *Output Data: Event Grain*)
 - [`qa-report.txt`](https://data.sustainable-fsa.com/fsa-lfp-eligibility/qa-report.txt) — QA summary and flagged records for the published data
 - [`fsa-lfp-eligibility.R`](./fsa-lfp-eligibility.R) — processing script
 - [`fsa-lfp-eligibility.qmd`](./fsa-lfp-eligibility.qmd) — Quarto dashboard source
@@ -33,7 +34,7 @@ The data in this repository were acquired via FOIA requests **2025-FSA-04690-F**
 
 ## ☁️ Archive Hosting & Automated Publishing
 
-The consolidated data (`fsa-lfp-eligibility.csv` and `fsa-lfp-eligibility.parquet`), the event-grain projection of it (`fsa-lfp-eligibility-events.csv` and `fsa-lfp-eligibility-events.parquet`), the QA report (`qa-report.txt`), the `assets/` directory the dashboard reads from, and the `foia/` correspondence are all mirrored to S3, served via CloudFront at <https://data.sustainable-fsa.com/fsa-lfp-eligibility/> (browse the [archive listing](https://data.sustainable-fsa.com/fsa-lfp-eligibility/) or [`_manifest.txt`](https://data.sustainable-fsa.com/fsa-lfp-eligibility/_manifest.txt) for a flat index). The interactive dashboard itself is served separately, via GitHub Pages at <https://sustainable-fsa.com/fsa-lfp-eligibility/>.
+The consolidated data (`fsa-lfp-eligibility.csv` and `fsa-lfp-eligibility.parquet`), the event-grain projection of it (`fsa-lfp-eligibility-events.csv`, `fsa-lfp-eligibility-events.parquet`, and `fsa-lfp-eligibility-events.json`), the QA report (`qa-report.txt`), the `assets/` directory the dashboard reads from, and the `foia/` correspondence are all mirrored to S3, served via CloudFront at <https://data.sustainable-fsa.com/fsa-lfp-eligibility/> (browse the [archive listing](https://data.sustainable-fsa.com/fsa-lfp-eligibility/) or [`_manifest.txt`](https://data.sustainable-fsa.com/fsa-lfp-eligibility/_manifest.txt) for a flat index). The interactive dashboard itself is served separately, via GitHub Pages at <https://sustainable-fsa.com/fsa-lfp-eligibility/>.
 
 Publishing is handled by [`fsa-lfp-eligibility.R`](fsa-lfp-eligibility.R) via the shared [`R/s3-archive.R`](R/s3-archive.R) helpers, and runs automatically in GitHub Actions ([`.github/workflows/fsa-lfp-eligibility.yaml`](.github/workflows/fsa-lfp-eligibility.yaml)) whenever the script, dashboard, or workflow changes, or on manual dispatch. The workflow authenticates to AWS via GitHub OIDC (no long-lived credentials stored in the repo), re-renders the README and dashboard, and commits them back to git only if the rendered output changed.
 
@@ -225,6 +226,44 @@ The events file does not round-trip to the wide file: determinations with no
 qualifying tier yield no event, and some 2008–2011 events have no date.
 [`qa-report.txt`](https://data.sustainable-fsa.com/fsa-lfp-eligibility/qa-report.txt)
 reconciles the two by program year.
+
+### `fsa-lfp-eligibility-events.json`
+
+[`fsa-lfp-eligibility-events.json`](https://data.sustainable-fsa.com/fsa-lfp-eligibility/fsa-lfp-eligibility-events.json)
+holds the same event records as the CSV and Parquet — derived from the identical
+validated table in the same run — restructured for direct use in a browser. It is
+what the eligibility dashboard loads, not an archive-of-record format; for
+analysis, use the CSV or Parquet. It differs in structure, not content:
+
+- **Column-oriented**: one array per field with one entry per record, rather than
+  one object per record, sorted on the integer index columns so the file gzips
+  from ~2.9 MB to roughly 280 KB over the wire.
+- **Dictionary-coded strings**: pasture types, FSA county codes, Census FIPS
+  codes, and qualifying drought events each appear once in a lookup array; the
+  record arrays hold integer indices into them.
+- **Compact dates**: each `Qualifying Date` is a day-of-year (`qy`) plus a year
+  offset from the program year (`qo`), not an ISO string. A grazing season that
+  opens in the calendar year before its program year carries qualifying dates
+  there too — 13% of dated events here — so the offset is what makes the day
+  number unambiguous.
+
+The payload is keyed on the **FSA county code**, with the Census FIPS code
+carried as a parallel per-record dictionary — the same two keys the tabular
+files carry, for the same reason (see
+[*Two county keys*](#🗺️-two-county-keys)). Nulls in `qy` and `qo` are the
+2008–2011 duration tiers with no recoverable satisfaction date; nulls in `mepm`
+are the 2008–2011 records, whose FOIA response carries no
+`Maximum Eligible Payment Months` at all (see *Program years 2008–2011*).
+
+The payload is self-describing via its `schema` field
+(`fsa-lfp-eligibility/1`), a frozen contract with the dashboard: fields may be
+added, but existing ones are never renamed or reordered without bumping the
+schema. The layout is shared with
+[fsa-lfp-eligibility-web](https://sustainable-fsa.com/fsa-lfp-eligibility-web/)
+and
+[fsa-lfp-eligibility-derived](https://data.sustainable-fsa.com/fsa-lfp-eligibility-derived/),
+so the three archives can be compared directly; the `dataset` field says which
+one a payload came from.
 
 ---
 
